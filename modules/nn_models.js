@@ -1,10 +1,10 @@
-export function getActor(trainable, state_len) {
+export function Actor(trainable, state_len) {
   const in_state = tf.input({ shape: [state_len] })
   const dense1 = tf.layers
     .dense({
-      units: 64,
+      units: 32,
       activation: "elu",
-      // kernelRegularizer: tf.regularizers.l2(1e-9),
+      kernelRegularizer: tf.regularizers.l2({ l2: 1e-6 }),
       trainable: trainable
     })
     .apply(in_state)
@@ -12,15 +12,15 @@ export function getActor(trainable, state_len) {
     .dense({
       units: 32,
       activation: "elu",
-      // kernelRegularizer: tf.regularizers.l2(1e-9),
+      kernelRegularizer: tf.regularizers.l2({ l2: 1e-6 }),
       trainable: trainable
     })
     .apply(dense1)
   const dense3 = tf.layers
     .dense({
-      units: 16,
+      units: 32,
       activation: "elu",
-      // kernelRegularizer: tf.regularizers.l2(1e-9),
+      kernelRegularizer: tf.regularizers.l2({ l2: 1e-6 }),
       trainable: trainable
     })
     .apply(dense2)
@@ -37,7 +37,7 @@ export function getActor(trainable, state_len) {
   })
 }
 
-function getCritic(trainable) {
+export function Critic(trainable, state_len) {
   const in_state = tf.input({ shape: [state_len] })
   const in_action = tf.input({ shape: [1] })
 
@@ -45,18 +45,18 @@ function getCritic(trainable) {
   // "LeakyReLU"
   const dense1 = tf.layers
     .dense({
-      units: 256,
+      units: 128,
       activation: "elu",
-      // kernelRegularizer: tf.regularizers.l2(1e-9),
+      kernelRegularizer: tf.regularizers.l2({ l2: 1e-6 }),
       trainable: trainable
     })
     .apply(in_state)
   const concat2 = tf.layers.concatenate().apply([dense1, in_action])
   const dense2 = tf.layers
     .dense({
-      units: 256,
+      units: 128,
       activation: "elu",
-      // kernelRegularizer: tf.regularizers.l2(1e-9),
+      kernelRegularizer: tf.regularizers.l2({ l2: 1e-6 }),
       trainable: trainable
     })
     .apply(concat2)
@@ -64,15 +64,15 @@ function getCritic(trainable) {
     .dense({
       units: 128,
       activation: "elu",
-      // kernelRegularizer: tf.regularizers.l2(1e-9),
+      kernelRegularizer: tf.regularizers.l2({ l2: 1e-6 }),
       trainable: trainable
     })
     .apply(dense2)
   const dense4 = tf.layers
     .dense({
-      units: 64,
+      units: 128,
       activation: "elu",
-      // kernelRegularizer: tf.regularizers.l2(1e-9),
+      kernelRegularizer: tf.regularizers.l2({ l2: 1e-6 }),
       trainable: trainable
     })
     .apply(dense3)
