@@ -21,30 +21,14 @@ body {
   justify-content: space-between;
   align-items: center;
 }
-.logo {
+#source-code-link {
   display: inline-block;
   height: 60px;
   width: 60px;
 }
-#source-code-link {
-  display: inline-block;
-  font-size: 40px;
-  color: white;
-  text-align: center;
-  padding: 0px 10px;
-  text-decoration: none;
-}
-#source-code-link :hover {
-  display: inline-block;
-  font-size: 30px;
-  color: white;
-  text-align: center;
-  padding: 0px 10px;
-  text-decoration: none;
-}
 .nav-head {
   display: inline-block;
-  color: white;
+  color: rgb(222, 222, 222);
   text-align: center;
   padding: 0px 10px;
   text-decoration: none;
