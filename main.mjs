@@ -2,6 +2,8 @@ import { createCanvas } from "./modules/canvas.mjs"
 import { Pendulum } from "./modules/pendulum.mjs"
 import global from "./modules/parameters.mjs"
 
+tf.setBackend("webgl")
+
 let pendulumCanvas = createCanvas(
   "pendulumCanvas",
   document.getElementById("main"),

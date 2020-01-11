@@ -26,7 +26,7 @@ export class DDPG {
   }
 
   async train(ep_step) {
-    tf.setBackend("webgl")
+    // tf.setBackend("webgl")
     const mb = this.replay_buffer.sample().slice()
 
     const mb_s0 = tf.tensor(

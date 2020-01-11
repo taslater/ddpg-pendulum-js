@@ -69,7 +69,7 @@ export class Pendulum {
     this.action = 0
     if (!initial) {
       this.noise_mag *= this.noise_decay
-      tf.setBackend("cpu")
+      // tf.setBackend("cpu")
       this.action = tf.tidy(() => {
         return this.ddpg.targetActor
           .predict(tf.tensor(s0, [1, s0.length]), {
