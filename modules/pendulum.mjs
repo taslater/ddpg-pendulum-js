@@ -9,10 +9,10 @@ export class Pendulum {
     this.action
     this.omega_lim = 0.5
     this.noise_sigma = 0.05
-    this.noise_theta = 0.999
-    this.noise_lim = 2
-    this.noise_mag = 2
-    this.noise_decay = 0.9999
+    this.noise_theta = 0.995
+    this.noise_mag = 4
+    this.noise_decay = 0.9997
+    this.noise_min = 0.5
     this.zig = new Ziggurat()
     this.ddpg = new DDPG(this.state.length)
     this.reset()
@@ -23,6 +23,7 @@ export class Pendulum {
     this.theta = 2 * Math.PI * (Math.random() - 0.5)
     this.omega = 0
     this.noise = this.noise_mag * (0.5 - Math.random())
+    // this.noise = 0
     this.torque = 0
   }
 
@@ -59,16 +60,12 @@ export class Pendulum {
     const s0 = this.state.slice()
     this.noise *= this.noise_theta
     this.noise += this.noise_sigma * this.zig.nextGaussian()
-    // this.noise_lim = 1
-    // if (!initial) {
-    //   this.noise_lim = 0.5
-    // }
-    if (Math.abs(this.noise) > this.noise_lim) {
-      this.noise *= this.noise_lim / Math.abs(this.noise)
-    }
     this.action = 0
     if (!initial) {
       this.noise_mag *= this.noise_decay
+      if (this.noise_mag < this.noise_min) {
+        this.noise_mag = this.noise_min
+      }
       // tf.setBackend("cpu")
       this.action = tf.tidy(() => {
         return this.ddpg.targetActor
@@ -79,19 +76,12 @@ export class Pendulum {
       })
     }
     if (this.action + this.noise * this.noise_mag > 1) {
-      // this.torque /= Math.abs(this.torque)
-      this.noise = (1 - this.action) / this.noise_mag
-      // this.noise *= -0.5
+      this.noise = (0.8 - this.action) / this.noise_mag
     } else if (this.action + this.noise * this.noise_mag < -1) {
-      // this.torque /= Math.abs(this.torque)
-      this.noise = (-1 - this.action) / this.noise_mag
-      // this.noise *= -0.5
+      this.noise = (-0.8 - this.action) / this.noise_mag
     }
     this.torque = this.action + this.noise * this.noise_mag
-    // if (Math.abs(this.torque) > 1) {
-    //   this.torque /= Math.abs(this.torque)
-    //   this.noise *= -0.1
-    // }
+
     const experience = { s0: s0, a: this.torque }
     const reward0 = this.reward
     this.omega +=
@@ -113,26 +103,38 @@ export class Pendulum {
   }
 
   show(ctx, wh) {
-    ctx.globalAlpha = 0.9
-    const v = Math.round(200 * (1 - Math.abs(this.theta) / Math.PI)) + 55
+    // ctx.globalAlpha = 0.9
+    ctx.lineCap = "round"
+    ctx.strokeStyle = `rgb(30,30,30)`
+    ctx.lineWidth = 3
+
+    ctx.beginPath()
+    ctx.moveTo(0.5 * wh, 0.05 * wh)
+    ctx.lineTo(0.5 * wh, 0.95 * wh)
+    ctx.stroke()
+
+    const _theta = this.theta - 0.5 * Math.PI
+    const v = Math.round(100 * (1 - Math.abs(this.theta) / Math.PI)) + 100
+
+    ctx.lineCap = "round"
     ctx.strokeStyle = `rgb(${v},${v},${v})`
     ctx.lineWidth = 0.06 * wh
-    ctx.lineCap = "round"
+
     ctx.beginPath()
     ctx.moveTo(0.5 * wh, 0.5 * wh)
     ctx.lineTo(
-      0.5 * wh * (1 + 2 * global.rRatio * Math.sin(this.theta)),
-      0.5 * wh * (1 - 2 * global.rRatio * Math.cos(this.theta))
+      0.5 * wh * (1 + 2 * global.rRatio * Math.cos(_theta)),
+      0.5 * wh * (1 + 2 * global.rRatio * Math.sin(_theta))
     )
     ctx.stroke()
 
     ctx.lineCap = "butt"
     ctx.strokeStyle = "red"
     ctx.lineWidth = 0.1 * wh * global.rRatio
-    const _theta = this.theta - 0.5 * Math.PI
-    let sorted_angles = [_theta, _theta - this.arc_display * this.torque].sort(
-      (a, b) => a - b
-    )
+
+    const _theta_torque = _theta - this.arc_display * this.torque
+
+    let sorted_angles = [_theta, _theta_torque].sort((a, b) => a - b)
     ctx.beginPath()
     ctx.arc(0.5 * wh, 0.5 * wh, wh * global.rRatio, ...sorted_angles)
     ctx.stroke()
@@ -156,6 +158,58 @@ export class Pendulum {
     ].sort((a, b) => a - b)
     ctx.beginPath()
     ctx.arc(0.5 * wh, 0.5 * wh, 0.8 * wh * global.rRatio, ...sorted_angles)
+    ctx.stroke()
+
+    ctx.lineCap = "round"
+    ctx.strokeStyle = `rgb(100,100,100)`
+    ctx.lineWidth = 3
+
+    const cw_lim = _theta - this.arc_display,
+      cw_lim_sn = Math.sin(cw_lim),
+      cw_lim_csn = Math.cos(cw_lim),
+      ccw_lim = _theta + this.arc_display,
+      ccw_lim_sn = Math.sin(ccw_lim),
+      ccw_lim_csn = Math.cos(ccw_lim),
+      lim_line_len = 0.3
+
+    // clock-wise
+    ctx.beginPath()
+    ctx.moveTo(
+      0.5 * wh * (1 + (1.8 + lim_line_len) * global.rRatio * cw_lim_csn),
+      0.5 * wh * (1 + (1.8 + lim_line_len) * global.rRatio * cw_lim_sn)
+    )
+    ctx.lineTo(
+      0.5 * wh * (1 + (1.8 - lim_line_len) * global.rRatio * cw_lim_csn),
+      0.5 * wh * (1 + (1.8 - lim_line_len) * global.rRatio * cw_lim_sn)
+    )
+    ctx.stroke()
+
+    // counter-clock-wise
+    ctx.beginPath()
+    ctx.moveTo(
+      0.5 * wh * (1 + (1.8 + lim_line_len) * global.rRatio * ccw_lim_csn),
+      0.5 * wh * (1 + (1.8 + lim_line_len) * global.rRatio * ccw_lim_sn)
+    )
+    ctx.lineTo(
+      0.5 * wh * (1 + (1.8 - lim_line_len) * global.rRatio * ccw_lim_csn),
+      0.5 * wh * (1 + (1.8 - lim_line_len) * global.rRatio * ccw_lim_sn)
+    )
+    ctx.stroke()
+
+    const torque_sn = Math.sin(_theta_torque),
+      torque_csn = Math.cos(_theta_torque)
+
+    ctx.strokeStyle = `rgb(150,150,150)`
+    // connect torque and noise arcs
+    ctx.beginPath()
+    ctx.moveTo(
+      0.5 * wh * (1 + (1.8 + lim_line_len) * global.rRatio * torque_csn),
+      0.5 * wh * (1 + (1.8 + lim_line_len) * global.rRatio * torque_sn)
+    )
+    ctx.lineTo(
+      0.5 * wh * (1 + (1.8 - lim_line_len) * global.rRatio * torque_csn),
+      0.5 * wh * (1 + (1.8 - lim_line_len) * global.rRatio * torque_sn)
+    )
     ctx.stroke()
 
     ctx.strokeStyle = "black"

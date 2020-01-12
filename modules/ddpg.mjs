@@ -2,6 +2,8 @@ import { Actor, Critic } from "./nn_models.js"
 import { ReplayBuffer } from "./replay.mjs"
 import global from "./parameters.mjs"
 
+tf.enableProdMode()
+
 export class DDPG {
   constructor(state_len) {
     this.state_len = state_len
@@ -47,9 +49,12 @@ export class DDPG {
     )
 
     const pred_next_actions = tf.tidy(() => {
-      return this.targetActor.predict(mb_s1, {
-        batchSize: global.mb_len
-      })
+      return this.targetActor.predict(
+        mb_s1.add(tf.randomNormal(mb_s1.shape, 0, this.obs_noise)),
+        {
+          batchSize: global.mb_len
+        }
+      )
     })
 
     // const q_now = tf.tidy(() => {
@@ -60,9 +65,15 @@ export class DDPG {
 
     const q_pred = tf.tidy(() => {
       return this.targetCritic
-        .predict([mb_s1, pred_next_actions], {
-          batchSize: global.mb_len
-        })
+        .predict(
+          [
+            mb_s1.add(tf.randomNormal(mb_s1.shape, 0, this.obs_noise)),
+            pred_next_actions
+          ],
+          {
+            batchSize: global.mb_len
+          }
+        )
         .mul(tf.scalar(global.discount))
         .add(mb_rewards)
       // .sub(q_now)
@@ -70,12 +81,16 @@ export class DDPG {
       // .add(q_now)
     })
 
-    await this.trainingCritic.fit([mb_s0, mb_actions], q_pred, {
-      epochs: 1,
-      batchSize: global.mb_len,
-      yieldEvery: "never",
-      shuffle: true
-    })
+    await this.trainingCritic.fit(
+      [mb_s0.add(tf.randomNormal(mb_s0.shape, 0, this.obs_noise)), mb_actions],
+      q_pred,
+      {
+        epochs: 1,
+        batchSize: global.mb_len,
+        yieldEvery: "never",
+        shuffle: true
+      }
+    )
 
     this.updateCriticWeights()
 

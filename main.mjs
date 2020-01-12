@@ -1,7 +1,7 @@
 import { Pendulum } from "./modules/pendulum.mjs"
 import global from "./modules/parameters.mjs"
 
-tf.setBackend("webgl")
+// tf.setBackend("webgl")
 
 let wh
 let pendulumCanvas = document.getElementById("pendulum-canvas")

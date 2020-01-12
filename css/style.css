@@ -2,6 +2,7 @@ html,
 body {
   font-family: Arial, Helvetica, sans-serif;
   font-size: 24px;
+  color: #d5d5d5;
   top: 0;
   left: 0;
   height: 100%;
@@ -31,10 +32,16 @@ main {
   width: 60px;
   padding-left: 30px;
 }
+#settings-img {
+  position: fixed;
+  height: 60px;
+  width: 60px;
+  bottom: 30px;
+  right: 30px;
+}
 #nav-header {
   display: inline-block;
   width: 100%;
-  color: rgb(222, 222, 222);
   text-align: right;
   padding-right: 30px;
   text-decoration: none;
@@ -42,6 +49,8 @@ main {
 .blurbspace {
   position: relative;
   margin: 0 100px;
+  /* background-color: black;
+  opacity: 0.5; */
   /* width: 100%; */
   /* text-align: center; */
   /* color: rgb(222, 222, 222); */
@@ -57,7 +66,8 @@ main {
   position: absolute;
   width: 100%;
   line-height: 1.5em;
-  color: white;
+  color: #eeeeee;
+  background-color: rgba(0, 0, 0, 0.1);
 }
 .blurb-top {
   top: 30%;

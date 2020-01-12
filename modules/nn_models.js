@@ -4,7 +4,7 @@ export function Actor(trainable, state_len) {
     .dense({
       units: 32,
       activation: "elu",
-      kernelRegularizer: tf.regularizers.l2({ l2: 1e-6 }),
+      kernelRegularizer: tf.regularizers.l2({ l2: 1e-3 }),
       trainable: trainable
     })
     .apply(in_state)
@@ -12,7 +12,7 @@ export function Actor(trainable, state_len) {
     .dense({
       units: 32,
       activation: "elu",
-      kernelRegularizer: tf.regularizers.l2({ l2: 1e-6 }),
+      kernelRegularizer: tf.regularizers.l2({ l2: 1e-4 }),
       trainable: trainable
     })
     .apply(dense1)
@@ -20,7 +20,7 @@ export function Actor(trainable, state_len) {
     .dense({
       units: 32,
       activation: "elu",
-      kernelRegularizer: tf.regularizers.l2({ l2: 1e-6 }),
+      kernelRegularizer: tf.regularizers.l2({ l2: 1e-5 }),
       trainable: trainable
     })
     .apply(dense2)
@@ -47,7 +47,7 @@ export function Critic(trainable, state_len) {
     .dense({
       units: 128,
       activation: "elu",
-      kernelRegularizer: tf.regularizers.l2({ l2: 1e-6 }),
+      kernelRegularizer: tf.regularizers.l2({ l2: 1e-3 }),
       trainable: trainable
     })
     .apply(in_state)
@@ -56,7 +56,7 @@ export function Critic(trainable, state_len) {
     .dense({
       units: 128,
       activation: "elu",
-      kernelRegularizer: tf.regularizers.l2({ l2: 1e-6 }),
+      kernelRegularizer: tf.regularizers.l2({ l2: 1e-4 }),
       trainable: trainable
     })
     .apply(concat2)
@@ -64,7 +64,7 @@ export function Critic(trainable, state_len) {
     .dense({
       units: 128,
       activation: "elu",
-      kernelRegularizer: tf.regularizers.l2({ l2: 1e-6 }),
+      kernelRegularizer: tf.regularizers.l2({ l2: 1e-5 }),
       trainable: trainable
     })
     .apply(dense2)
