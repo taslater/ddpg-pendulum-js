@@ -9,11 +9,13 @@ let ctx = pendulumCanvas.getContext("2d")
 
 function resizeCanvas() {
   let navbarHeight = document.getElementById("navbar").offsetHeight
+  document.body.style.paddingTop = navbarHeight + "px"
   wh = Math.min(window.innerHeight - navbarHeight, window.innerWidth)
   pendulumCanvas.width = wh
-  setTimeout(function() {
-    pendulumCanvas.height = wh
-  }, 0)
+  // setTimeout(function() {
+  pendulumCanvas.height = wh
+  // }, 0)
+  pendulumCanvas.style.top = navbarHeight + "px"
 }
 resizeCanvas()
 window.onresize = resizeCanvas

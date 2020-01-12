@@ -9,17 +9,16 @@ body {
   margin: 0;
   background-color: black;
 }
-#navbar {
+header {
   position: fixed;
   top: 0;
   left: 0;
-  right: 0;
-  flex: 1;
+  width: 100%;
   display: flex;
   margin: 0% 0%;
   justify-content: space-between;
   align-items: center;
-  background-color: black;
+  background-color: rgb(31, 31, 31);
   z-index: 2;
 }
 main {
@@ -42,7 +41,8 @@ main {
 }
 .blurbspace {
   position: relative;
-  width: 100%;
+  margin: 0 100px;
+  /* width: 100%; */
   /* text-align: center; */
   /* color: rgb(222, 222, 222); */
 }
@@ -55,7 +55,6 @@ main {
 .blurb {
   /* display: inline-block; */
   position: absolute;
-  top: 0%;
   width: 100%;
   line-height: 1.5em;
   color: white;
