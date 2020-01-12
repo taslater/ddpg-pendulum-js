@@ -11,10 +11,11 @@
   <body>
     <nav id="navbar">
       <a href="https://github.com/taslater/taslater.github.io"
-        ><img class="source-code-img" src="./img/source_code.png"
+        ><img id="source-code-img" src="./img/source_code.png"
       /></a>
       <h1 id="nav-header">a little Reinforcement Learning</h1>
     </nav>
+
     <main id="main">
       <canvas id="pendulum-canvas"></canvas>
       <div class="blurbspace blurbspace-top">
@@ -22,35 +23,137 @@
           Swing!
         </h1>
       </div>
+
       <div class="blurbspace blurbspace-follow">
         <section class="blurb blurb-follow">
           <h1>
             What is this?
           </h1>
-          <p>It's a pendulum controlled by a neural network.</p>
+          <h3>It's a pendulum controlled by a neural network.</h3>
           <p>
-            That network is a component of an algorithm called DDPG (Deep
-            Deterministic Policy Gradients). Sounds fancy, doesn't it?
+            The pendulum is a simple physics simulation with gravity and a
+            little friction.
+          </p>
+          <p>
+            A neural network controls the pendulum. It's a component in an
+            algorithm called DDPG (Deep Deterministic Policy Gradients). Sounds
+            fancy, doesn't it?
           </p>
         </section>
-
-        <p></p>
       </div>
+
+      <div class="blurbspace blurbspace-follow">
+        <section class="blurb blurb-follow">
+          <h1>
+            What is it doing?
+          </h1>
+          <h3>
+            It's learning to stand up straight, naturally.
+          </h3>
+          <p>
+            The neural net controls a weak imaginary motor. To balance the
+            pendulum it has to control the direction and strength of the motor's
+            torque.
+          </p>
+          <h3>
+            And it is learning.
+          </h3>
+          <p>
+            Our first neural network needs a friend to help it learn. The neural
+            net that helps it is called a critic; the neural net that controls
+            the pendulum is called an actor.
+          </p>
+        </section>
+      </div>
+
+      <div class="blurbspace blurbspace-follow">
+        <section class="blurb blurb-follow">
+          <h1>
+            What do those colors mean?
+          </h1>
+          <h3>
+            The actor needs to explore.
+          </h3>
+          <p>
+            To learn which actions are better than others, the critic needs
+            experience. If the actor always does the same thing, the critic
+            won't have a chance to evaluate the alternatives. But the actor is
+            deterministic: in the same situations it always makes the same
+            choices. We need to add some randomness to explore other
+            possibilities.
+          </p>
+          <p>
+            <span class="font font-blue">BLUE</span> is the actor's decision.
+          </p>
+          <p>
+            <span class="font font-green">GREEN</span> is random exploration.
+          </p>
+          <p>
+            <span class="font font-red">RED</span> is the sum of the actor's
+            decision and random exploration.
+          </p>
+          <p>
+            There is no blue bar at the beginning of the simulation because the
+            critic needs to collect some randomly explored data to start
+            learning.
+          </p>
+          <!-- <p>Learn more about exploration...</p> -->
+        </section>
+      </div>
+
       <div class="blurbspace blurbspace-follow">
         <section class="blurb blurb-follow">
           <h1>
             Why does it keep reappearing?
           </h1>
-          <p>
+          <h3>
             The pendulum is simulated in episodes.
-          </p>
+          </h3>
           <p>
             Each episode is 200 frames long. When an episode completes, the
             pendulum resets at a random position.
           </p>
           <p>
-            Restarting at a random location gives the network a chance to learn
-            and allows us to evaluate the performance of the algorithm.
+            Restarting at a random location gives the network a chance to
+            explore new scenarios and allows us to evaluate the performance of
+            the algorithm.
+          </p>
+        </section>
+      </div>
+
+      <div class="blurbspace blurbspace-follow">
+        <section class="blurb blurb-follow">
+          <h1>
+            What exactly is it learning?
+          </h1>
+          <h3>
+            The pendulum "tells" the critic what it likes.
+          </h3>
+          <p>
+            For the critic to evaluate the quality of a decision, it needs a
+            rubrik establishing what is a good or bad result. That rubrik is
+            called a reward function.
+          </p>
+          <p>
+            At each moment, the pendulum has a state: its direction (angle),
+            speed (angular velocity), and the torque from the motor. The reward
+            function converts a state to a number that scores how much we like
+            that state.
+          </p>
+        </section>
+      </div>
+
+      <div class="blurbspace blurbspace-follow">
+        <section class="blurb blurb-follow">
+          <h1>
+            Can you be a little more specific?
+          </h1>
+          <p>
+            Here are lots of helpful links.
+          </p>
+          <p>
+            Also, let me give you access to the parameters of the algorithm so
+            you can play around.
           </p>
         </section>
       </div>

@@ -16,7 +16,7 @@ body {
   right: 0;
   flex: 1;
   display: flex;
-  margin: 0% 5%;
+  margin: 0% 0%;
   justify-content: space-between;
   align-items: center;
   background-color: black;
@@ -26,29 +26,31 @@ main {
   height: 100%;
   z-index: 1;
 }
-.source-code-img {
+#source-code-img {
   display: inline-block;
   height: 60px;
   width: 60px;
+  padding-left: 30px;
 }
 #nav-header {
   display: inline-block;
+  width: 100%;
   color: rgb(222, 222, 222);
-  text-align: center;
-  padding: 0px 10px;
+  text-align: right;
+  padding-right: 30px;
   text-decoration: none;
 }
 .blurbspace {
   position: relative;
   width: 100%;
   /* text-align: center; */
-  color: white;
+  /* color: rgb(222, 222, 222); */
 }
 .blurbspace-top {
   min-height: 100%;
 }
 .blurbspace-follow {
-  min-height: 75%;
+  min-height: 100%;
 }
 .blurb {
   /* display: inline-block; */
@@ -63,7 +65,19 @@ main {
   text-align: center;
 }
 .blurb-follow {
-  top: 0%;
+  top: 30%;
+}
+.font {
+  font-weight: bold;
+}
+.font-blue {
+  color: rgb(59, 59, 255);
+}
+.font-green {
+  color: green;
+}
+.font-red {
+  color: red;
 }
 #pendulum-canvas {
   position: fixed;
