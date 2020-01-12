@@ -112,33 +112,29 @@ export class Pendulum {
     this.ddpg.replay_buffer.add(Object.assign({}, experience))
   }
 
-  show(ctx) {
+  show(ctx, wh) {
+    ctx.globalAlpha = 0.9
     const v = Math.round(200 * (1 - Math.abs(this.theta) / Math.PI)) + 55
     ctx.strokeStyle = `rgb(${v},${v},${v})`
-    ctx.lineWidth = 40
+    ctx.lineWidth = 0.06 * wh
     ctx.lineCap = "round"
     ctx.beginPath()
-    ctx.moveTo(0.5 * global.wh, 0.5 * global.wh)
+    ctx.moveTo(0.5 * wh, 0.5 * wh)
     ctx.lineTo(
-      0.5 * global.wh * (1 + 2 * global.rRatio * Math.sin(this.theta)),
-      0.5 * global.wh * (1 - 2 * global.rRatio * Math.cos(this.theta))
+      0.5 * wh * (1 + 2 * global.rRatio * Math.sin(this.theta)),
+      0.5 * wh * (1 - 2 * global.rRatio * Math.cos(this.theta))
     )
     ctx.stroke()
 
     ctx.lineCap = "butt"
     ctx.strokeStyle = "red"
-    ctx.lineWidth = 0.1 * global.wh * global.rRatio
+    ctx.lineWidth = 0.1 * wh * global.rRatio
     const _theta = this.theta - 0.5 * Math.PI
     let sorted_angles = [_theta, _theta - this.arc_display * this.torque].sort(
       (a, b) => a - b
     )
     ctx.beginPath()
-    ctx.arc(
-      0.5 * global.wh,
-      0.5 * global.wh,
-      global.wh * global.rRatio,
-      ...sorted_angles
-    )
+    ctx.arc(0.5 * wh, 0.5 * wh, wh * global.rRatio, ...sorted_angles)
     ctx.stroke()
 
     ctx.strokeStyle = "blue"
@@ -147,12 +143,7 @@ export class Pendulum {
       (a, b) => a - b
     )
     ctx.beginPath()
-    ctx.arc(
-      0.5 * global.wh,
-      0.5 * global.wh,
-      0.9 * global.wh * global.rRatio,
-      ...sorted_angles
-    )
+    ctx.arc(0.5 * wh, 0.5 * wh, 0.9 * wh * global.rRatio, ...sorted_angles)
     ctx.stroke()
 
     ctx.strokeStyle = "green"
@@ -164,20 +155,15 @@ export class Pendulum {
         this.arc_display * this.noise * this.noise_mag
     ].sort((a, b) => a - b)
     ctx.beginPath()
-    ctx.arc(
-      0.5 * global.wh,
-      0.5 * global.wh,
-      0.8 * global.wh * global.rRatio,
-      ...sorted_angles
-    )
+    ctx.arc(0.5 * wh, 0.5 * wh, 0.8 * wh * global.rRatio, ...sorted_angles)
     ctx.stroke()
 
     ctx.strokeStyle = "black"
     ctx.lineCap = "round"
-    ctx.lineWidth = 30
+    ctx.lineWidth = 0.045 * wh
     ctx.beginPath()
-    ctx.moveTo(0.5 * global.wh, 0.5 * global.wh)
-    ctx.lineTo(0.5 * global.wh, 0.5 * global.wh)
+    ctx.moveTo(0.5 * wh, 0.5 * wh)
+    ctx.lineTo(0.5 * wh, 0.5 * wh)
     ctx.stroke()
   }
 }

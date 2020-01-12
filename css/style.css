@@ -1,3 +1,4 @@
+html,
 body {
   font-family: Arial, Helvetica, sans-serif;
   font-size: 24px;
@@ -8,33 +9,68 @@ body {
   margin: 0;
   background-color: black;
 }
-.wrapper {
-  margin: auto;
+#navbar {
+  position: fixed;
   top: 0;
   left: 0;
-  background-color: "black";
-}
-.navbar {
+  right: 0;
   flex: 1;
   display: flex;
   margin: 0% 5%;
   justify-content: space-between;
   align-items: center;
+  background-color: black;
+  z-index: 2;
+}
+main {
+  height: 100%;
+  z-index: 1;
 }
 .source-code-img {
   display: inline-block;
   height: 60px;
   width: 60px;
 }
-.nav-head {
+#nav-header {
   display: inline-block;
   color: rgb(222, 222, 222);
   text-align: center;
   padding: 0px 10px;
   text-decoration: none;
 }
-canvas {
+.blurbspace {
+  position: relative;
+  width: 100%;
+  /* text-align: center; */
+  color: white;
+}
+.blurbspace-top {
+  min-height: 100%;
+}
+.blurbspace-follow {
+  min-height: 75%;
+}
+.blurb {
+  /* display: inline-block; */
+  position: absolute;
+  top: 0%;
+  width: 100%;
+  line-height: 1.5em;
+  color: white;
+}
+.blurb-top {
+  top: 30%;
+  text-align: center;
+}
+.blurb-follow {
+  top: 0%;
+}
+#pendulum-canvas {
+  position: fixed;
+  top: 0;
+  bottom: 0;
+  left: 0;
+  right: 0;
   margin: auto;
-  display: block;
-  background-color: black;
+  z-index: 0;
 }

@@ -2,21 +2,58 @@
 <html lang="en">
   <head>
     <meta charset="UTF-8" />
-    <title>Live DDPG Pendulum</title>
+    <title>Learning Pendulum</title>
     <link rel="stylesheet" href="./css/style.css" />
-    <link rel="icon" type="image/png" href="./img/smiley.png" />
+    <link rel="icon" type="image/png" href="./img/source_code.png" />
     <script type="module" src="./main.mjs"></script>
     <script src="https://cdn.jsdelivr.net/npm/@tensorflow/tfjs/dist/tf.min.js"></script>
   </head>
   <body>
-    <div class="wrapper">
-      <nav class="navbar">
-        <a href="https://github.com/taslater/taslater.github.io"
-          ><img class="source-code-img" src="./img/source_code.png"
-        /></a>
-        <h1 class="nav-head">a delightful DDPG pendulum</h1>
-      </nav>
-      <main id="main"></main>
-    </div>
+    <nav id="navbar">
+      <a href="https://github.com/taslater/taslater.github.io"
+        ><img class="source-code-img" src="./img/source_code.png"
+      /></a>
+      <h1 id="nav-header">a little Reinforcement Learning</h1>
+    </nav>
+    <main id="main">
+      <canvas id="pendulum-canvas"></canvas>
+      <div class="blurbspace blurbspace-top">
+        <h1 class="blurb blurb-top">
+          Swing!
+        </h1>
+      </div>
+      <div class="blurbspace blurbspace-follow">
+        <section class="blurb blurb-follow">
+          <h1>
+            What is this?
+          </h1>
+          <p>It's a pendulum controlled by a neural network.</p>
+          <p>
+            That network is a component of an algorithm called DDPG (Deep
+            Deterministic Policy Gradients). Sounds fancy, doesn't it?
+          </p>
+        </section>
+
+        <p></p>
+      </div>
+      <div class="blurbspace blurbspace-follow">
+        <section class="blurb blurb-follow">
+          <h1>
+            Why does it keep reappearing?
+          </h1>
+          <p>
+            The pendulum is simulated in episodes.
+          </p>
+          <p>
+            Each episode is 200 frames long. When an episode completes, the
+            pendulum resets at a random position.
+          </p>
+          <p>
+            Restarting at a random location gives the network a chance to learn
+            and allows us to evaluate the performance of the algorithm.
+          </p>
+        </section>
+      </div>
+    </main>
   </body>
 </html>

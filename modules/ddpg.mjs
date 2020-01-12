@@ -79,7 +79,7 @@ export class DDPG {
 
     this.updateCriticWeights()
 
-    if (ep_step % 1 == 0) {
+    if (ep_step % 2 == 1) {
       tf.tidy(() => {
         const grads = this.ac_optimizer.computeGradients(() => {
           return this.targetCritic
