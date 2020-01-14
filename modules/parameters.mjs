@@ -8,5 +8,5 @@ export default {
   // lr_alpha: 0.1,
   ep_steps: 200,
   g: 0.005,
-  training_episodes: 8
+  training_episodes: 6
 }

@@ -20,9 +20,25 @@ function resizeCanvas() {
 resizeCanvas()
 window.onresize = resizeCanvas
 
+window.addEventListener("DOMContentLoaded", event => {
+  document
+    .getElementById("settings-btn")
+    .addEventListener("click", toggleOverlay)
+})
+
+function toggleOverlay() {
+  const divs = document.getElementsByClassName("blurbspace")
+  for (let div of divs) {
+    div.style.display = div.style.display == "none" ? "block" : "none"
+  }
+  const controlsDiv = document.getElementById("controls-div")
+  controlsDiv.style.display = divs[0].style.display == "none" ? "block" : "none"
+}
+
 const pendulum = new Pendulum()
 let step = 0
 let episode = 0
+let done_training = true
 
 async function draw() {
   ctx.clearRect(0, 0, wh, wh)
@@ -30,12 +46,12 @@ async function draw() {
     step = 0
     episode++
     pendulum.reset()
-    window.requestAnimationFrame(draw)
   }
   pendulum.show(ctx, wh)
   pendulum.update(episode <= global.training_episodes)
-  if (episode > global.training_episodes) {
-    await pendulum.ddpg.train(step)
+  if (episode > global.training_episodes && done_training) {
+    done_training = false
+    await pendulum.ddpg.train(step).then((done_training = true))
   }
   step++
   window.requestAnimationFrame(draw)

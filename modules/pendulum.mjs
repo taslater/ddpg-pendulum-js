@@ -21,6 +21,7 @@ export class Pendulum {
 
   reset() {
     this.theta = 2 * Math.PI * (Math.random() - 0.5)
+    // this.prev_theta = this.theta
     this.omega = 0
     this.noise = this.noise_mag * (0.5 - Math.random())
     // this.noise = 0
@@ -43,21 +44,25 @@ export class Pendulum {
   }
 
   get state() {
-    const csn = Math.cos(this.theta)
-    const sn = Math.sin(this.theta)
+    const csn = Math.cos(this.theta),
+      sn = Math.sin(this.theta)
     return [
       csn,
       sn,
-      csn * csn,
-      sn * sn,
-      0.5 - Math.abs(this.theta) / Math.PI,
-      // this.theta,
+      // 0.5 - Math.abs(this.theta) / Math.PI,
+      // Math.cos(this.theta - this.omega) - csn,
+      // Math.sin(this.theta - this.omega) - sn,
+      // this.theta > 0 ? 1 : -1,
+      sn > 0 ? 1 : -1,
+      this.omega > 0 ? 1 : -1,
+      Math.abs(10 * this.omega),
       10 * this.omega
     ]
   }
 
   update(initial) {
     const s0 = this.state.slice()
+    // this.prev_theta = this.theta
     this.noise *= this.noise_theta
     this.noise += this.noise_sigma * this.zig.nextGaussian()
     this.action = 0
@@ -98,6 +103,7 @@ export class Pendulum {
     }
     const reward1 = this.reward
     experience.r = reward1 - reward0
+    // experience.r = reward1
     experience.s1 = this.state.slice()
     this.ddpg.replay_buffer.add(Object.assign({}, experience))
   }

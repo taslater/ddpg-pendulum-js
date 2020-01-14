@@ -32,12 +32,19 @@ main {
   width: 60px;
   padding-left: 30px;
 }
-#settings-img {
+#settings-img,
+#settings-btn {
   position: fixed;
   height: 60px;
   width: 60px;
   bottom: 30px;
   right: 30px;
+}
+#settings-btn {
+  background: none;
+  outline: none;
+  border: none;
+  cursor: pointer;
 }
 #nav-header {
   display: inline-block;
@@ -49,11 +56,6 @@ main {
 .blurbspace {
   position: relative;
   margin: 0 100px;
-  /* background-color: black;
-  opacity: 0.5; */
-  /* width: 100%; */
-  /* text-align: center; */
-  /* color: rgb(222, 222, 222); */
 }
 .blurbspace-top {
   min-height: 100%;
@@ -62,7 +64,6 @@ main {
   min-height: 100%;
 }
 .blurb {
-  /* display: inline-block; */
   position: absolute;
   width: 100%;
   line-height: 1.5em;
@@ -96,4 +97,13 @@ main {
   right: 0;
   margin: auto;
   z-index: 0;
+}
+#controls-div {
+  display: none;
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  width: 100%;
+  height: 30px;
+  background-color: white;
 }

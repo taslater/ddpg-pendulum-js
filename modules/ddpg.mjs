@@ -27,110 +27,122 @@ export class DDPG {
     this.obs_noise = 0.01
   }
 
-  async train(ep_step) {
-    // tf.setBackend("webgl")
-    const mb = this.replay_buffer.sample().slice()
+  train(ep_step) {
+    return new Promise((resolve, reject) => {
+      // tf.setBackend("webgl")
+      const mb = this.replay_buffer.sample().slice()
 
-    const mb_s0 = tf.tensor(
-      mb.map(experience => experience.s0),
-      [global.mb_len, this.state_len]
-    )
-    const mb_actions = tf.tensor(
-      mb.map(experience => experience.a),
-      [global.mb_len, 1]
-    )
-    const mb_rewards = tf.tensor(
-      mb.map(experience => experience.r),
-      [global.mb_len, 1]
-    )
-    const mb_s1 = tf.tensor(
-      mb.map(experience => experience.s1),
-      [global.mb_len, this.state_len]
-    )
-
-    const pred_next_actions = tf.tidy(() => {
-      return this.targetActor.predict(
-        mb_s1.add(tf.randomNormal(mb_s1.shape, 0, this.obs_noise)),
-        {
-          batchSize: global.mb_len
-        }
+      const mb_s0 = tf.tensor(
+        mb.map(experience => experience.s0),
+        [global.mb_len, this.state_len]
       )
-    })
+      const mb_actions = tf.tensor(
+        mb.map(experience => experience.a),
+        [global.mb_len, 1]
+      )
+      const mb_rewards = tf.tensor(
+        mb.map(experience => experience.r),
+        [global.mb_len, 1]
+      )
+      const mb_s1 = tf.tensor(
+        mb.map(experience => experience.s1),
+        [global.mb_len, this.state_len]
+      )
 
-    // const q_now = tf.tidy(() => {
-    //   return this.targetCritic.predict([mb_s0, mb_actions], {
-    //     batchSize: global.mb_len
-    //   })
-    // })
-
-    const q_pred = tf.tidy(() => {
-      return this.targetCritic
-        .predict(
-          [
-            mb_s1.add(tf.randomNormal(mb_s1.shape, 0, this.obs_noise)),
-            pred_next_actions
-          ],
+      const pred_next_actions = tf.tidy(() => {
+        return this.targetActor.predict(
+          mb_s1.add(tf.randomNormal(mb_s1.shape, 0, this.obs_noise)),
           {
             batchSize: global.mb_len
           }
         )
-        .mul(tf.scalar(global.discount))
-        .add(mb_rewards)
-      // .sub(q_now)
-      // .mul(tf.scalar(global.lr_alpha))
-      // .add(q_now)
-    })
-
-    await this.trainingCritic.fit(
-      [mb_s0.add(tf.randomNormal(mb_s0.shape, 0, this.obs_noise)), mb_actions],
-      q_pred,
-      {
-        epochs: 1,
-        batchSize: global.mb_len,
-        yieldEvery: "never",
-        shuffle: true
-      }
-    )
-
-    this.updateCriticWeights()
-
-    if (ep_step % 2 == 1) {
-      tf.tidy(() => {
-        const grads = this.ac_optimizer.computeGradients(() => {
-          return this.targetCritic
-            .apply(
-              [
-                mb_s1.add(tf.randomNormal(mb_s1.shape, 0, this.obs_noise)),
-                this.trainingActor.predict(
-                  mb_s1.add(tf.randomNormal(mb_s1.shape, 0, this.obs_noise)),
-                  {
-                    batchSize: global.mb_len
-                  }
-                )
-              ],
-              {
-                batchSize: global.mb_len
-              }
-            )
-            .sum()
-            .mul(tf.scalar(-1))
-        }, this.actorWeights).grads
-        for (let i = 0; i < grads.length; i++) {
-          grads[i] = grads[i].clipByValue(-1, 1)
-        }
-        this.ac_optimizer.applyGradients(grads)
       })
 
-      this.updateActorWeights()
-    }
+      // const q_now = tf.tidy(() => {
+      //   return this.targetCritic.predict([mb_s0, mb_actions], {
+      //     batchSize: global.mb_len
+      //   })
+      // })
 
-    tf.dispose(mb_s0)
-    tf.dispose(mb_actions)
-    tf.dispose(mb_rewards)
-    tf.dispose(mb_s1)
-    tf.dispose(pred_next_actions)
-    tf.dispose(q_pred)
-    // tf.dispose(q_now)
+      const q_pred = tf.tidy(() => {
+        return this.targetCritic
+          .predict(
+            [
+              mb_s1.add(tf.randomNormal(mb_s1.shape, 0, this.obs_noise)),
+              pred_next_actions
+            ],
+            {
+              batchSize: global.mb_len
+            }
+          )
+          .mul(tf.scalar(global.discount))
+          .add(mb_rewards)
+        // .sub(q_now)
+        // .mul(tf.scalar(global.lr_alpha))
+        // .add(q_now)
+      })
+
+      this.trainingCritic
+        .fit(
+          [
+            mb_s0.add(tf.randomNormal(mb_s0.shape, 0, this.obs_noise)),
+            mb_actions
+          ],
+          q_pred,
+          {
+            epochs: 1,
+            batchSize: global.mb_len,
+            yieldEvery: "never",
+            shuffle: true
+          }
+        )
+        .then(() => {
+          this.updateCriticWeights()
+
+          if (ep_step % 2 == 1) {
+            tf.tidy(() => {
+              const grads = this.ac_optimizer.computeGradients(() => {
+                return this.targetCritic
+                  .apply(
+                    [
+                      mb_s1.add(
+                        tf.randomNormal(mb_s1.shape, 0, this.obs_noise)
+                      ),
+                      this.trainingActor.predict(
+                        mb_s1.add(
+                          tf.randomNormal(mb_s1.shape, 0, this.obs_noise)
+                        ),
+                        {
+                          batchSize: global.mb_len
+                        }
+                      )
+                    ],
+                    {
+                      batchSize: global.mb_len
+                    }
+                  )
+                  .sum()
+                  .mul(tf.scalar(-1))
+              }, this.actorWeights).grads
+              for (let i = 0; i < grads.length; i++) {
+                grads[i] = grads[i].clipByValue(-1, 1)
+              }
+              this.ac_optimizer.applyGradients(grads)
+            })
+
+            this.updateActorWeights()
+          }
+
+          tf.dispose(mb_s0)
+          tf.dispose(mb_actions)
+          tf.dispose(mb_rewards)
+          tf.dispose(mb_s1)
+          tf.dispose(pred_next_actions)
+          tf.dispose(q_pred)
+
+          resolve()
+        })
+    })
   }
 
   updateActorWeights() {

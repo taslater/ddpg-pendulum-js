@@ -5,6 +5,21 @@
     <title>Learning Pendulum</title>
     <link rel="stylesheet" href="./css/style.css" />
     <link rel="icon" type="image/png" href="./img/source_code.png" />
+    <!-- Global site tag (gtag.js) - Google Analytics -->
+    <script
+      async
+      src="https://www.googletagmanager.com/gtag/js?id=UA-156189593-1"
+    ></script>
+    <script>
+      window.dataLayer = window.dataLayer || []
+      function gtag() {
+        dataLayer.push(arguments)
+      }
+      gtag("js", new Date())
+
+      gtag("config", "UA-156189593-1")
+    </script>
+
     <script type="module" src="./main.mjs"></script>
     <script src="https://cdn.jsdelivr.net/npm/@tensorflow/tfjs/dist/tf.min.js"></script>
   </head>
@@ -18,7 +33,9 @@
 
     <main id="main">
       <canvas id="pendulum-canvas"></canvas>
-      <a href="#"><img id="settings-img" src="./img/icons8-settings.svg"/></a>
+      <img id="settings-img" src="./img/icons8-settings.svg" />
+      <button id="settings-btn"></button>
+      <!-- <a href="#"></a> -->
       <div class="blurbspace blurbspace-top">
         <div class="blurb-box">
           <h1 class="blurb blurb-top">
@@ -160,6 +177,8 @@
           </p>
         </section>
       </div>
+
+      <div id="controls-div"></div>
     </main>
   </body>
 </html>
