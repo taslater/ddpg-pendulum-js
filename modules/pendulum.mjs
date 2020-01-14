@@ -49,14 +49,14 @@ export class Pendulum {
     return [
       csn,
       sn,
+      10 * this.omega
       // 0.5 - Math.abs(this.theta) / Math.PI,
       // Math.cos(this.theta - this.omega) - csn,
       // Math.sin(this.theta - this.omega) - sn,
       // this.theta > 0 ? 1 : -1,
-      sn > 0 ? 1 : -1,
-      this.omega > 0 ? 1 : -1,
-      Math.abs(10 * this.omega),
-      10 * this.omega
+      // sn > 0 ? 1 : -1,
+      // this.omega > 0 ? 1 : -1,
+      // Math.abs(10 * this.omega)
     ]
   }
 

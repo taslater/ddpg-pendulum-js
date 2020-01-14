@@ -1,5 +1,5 @@
 export default {
-  mb_len: 128,
+  mb_len: 256,
   buffer_len: 2e4,
   // wh: 800,
   rRatio: 0.4,
@@ -8,5 +8,5 @@ export default {
   // lr_alpha: 0.1,
   ep_steps: 200,
   g: 0.005,
-  training_episodes: 6
+  training_episodes: 10
 }

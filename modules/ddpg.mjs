@@ -139,6 +139,7 @@ export class DDPG {
           tf.dispose(mb_s1)
           tf.dispose(pred_next_actions)
           tf.dispose(q_pred)
+          // tf.dispose(q_now)
 
           resolve()
         })
