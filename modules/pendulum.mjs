@@ -18,7 +18,6 @@ export class Pendulum {
     this.omega = 0
     this.noise = 0.25 * this.noise_mag * (0.5 - Math.random())
     // this.noise = 0
-    this.torque = 0
   }
 
   get reward() {
@@ -31,8 +30,8 @@ export class Pendulum {
     // )
     // return -(
     //   Math.abs(this.theta) +
-    //   Math.abs(this.omega) +
-    //   Math.abs(this.torque)
+    // Math.abs(this.omega) +
+    // 0.01 * Math.abs(this.torque)
     // )
   }
 
@@ -48,8 +47,8 @@ export class Pendulum {
       // Math.cos(this.theta - this.omega) - csn,
       // Math.sin(this.theta - this.omega) - sn,
       // this.theta > 0 ? 1 : 0,
-      // sn > 0 ? 1 : 0,
-      // this.omega > 0 ? 1 : 0,
+      // sn > 0 ? 1 : -1,
+      // this.omega > 0 ? 1 : -1
       // Math.abs(10 * this.omega)
     ]
   }

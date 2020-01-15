@@ -18,7 +18,7 @@ export default {
   g: 0.004,
   rRatio: 0.4,
   drag: 0.995,
-  torque_mag: 0.003,
+  torque_mag: 0.002,
   omega_lim: 0.5,
 
   noise_sigma: 0.3,

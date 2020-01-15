@@ -41,6 +41,8 @@ export class DDPG {
               experience.s0[0],
               experience.s0[1] * -1,
               experience.s0[2] * -1
+              // experience.s0[3] * -1,
+              // experience.s0[4] * -1
             ])
           ),
         [2 * global.mb_len, this.state_len]
@@ -65,6 +67,8 @@ export class DDPG {
               experience.s1[0],
               experience.s1[1] * -1,
               experience.s1[2] * -1
+              // experience.s1[3] * -1,
+              // experience.s1[4] * -1
             ])
           ),
         [2 * global.mb_len, this.state_len]
