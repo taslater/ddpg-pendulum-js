@@ -24,7 +24,8 @@ export class DDPG {
     }
     this.ac_optimizer = tf.train.adam(0.001)
 
-    this.obs_noise = 0.01
+    this.actorTau = global.actorTauInitial
+    this.criticTau = global.criticTauInitial
   }
 
   train(ep_step) {
@@ -33,25 +34,45 @@ export class DDPG {
       const mb = this.replay_buffer.sample().slice()
 
       const mb_s0 = tf.tensor(
-        mb.map(experience => experience.s0),
-        [global.mb_len, this.state_len]
+        mb
+          .map(experience => experience.s0)
+          .concat(
+            mb.map(experience => [
+              experience.s0[0],
+              experience.s0[1] * -1,
+              experience.s0[2] * -1
+            ])
+          ),
+        [2 * global.mb_len, this.state_len]
       )
       const mb_actions = tf.tensor(
-        mb.map(experience => experience.a),
-        [global.mb_len, 1]
+        mb
+          .map(experience => experience.a)
+          .concat(mb.map(experience => experience.a * -1)),
+        [2 * global.mb_len, 1]
       )
       const mb_rewards = tf.tensor(
-        mb.map(experience => experience.r),
-        [global.mb_len, 1]
+        mb
+          .map(experience => experience.r)
+          .concat(mb.map(experience => experience.r)),
+        [2 * global.mb_len, 1]
       )
       const mb_s1 = tf.tensor(
-        mb.map(experience => experience.s1),
-        [global.mb_len, this.state_len]
+        mb
+          .map(experience => experience.s1)
+          .concat(
+            mb.map(experience => [
+              experience.s1[0],
+              experience.s1[1] * -1,
+              experience.s1[2] * -1
+            ])
+          ),
+        [2 * global.mb_len, this.state_len]
       )
 
       const pred_next_actions = tf.tidy(() => {
         return this.targetActor.predict(
-          mb_s1.add(tf.randomNormal(mb_s1.shape, 0, this.obs_noise)),
+          mb_s1.add(tf.randomNormal(mb_s1.shape, 0, global.obs_noise)),
           {
             batchSize: global.mb_len
           }
@@ -68,11 +89,11 @@ export class DDPG {
         return this.targetCritic
           .predict(
             [
-              mb_s1.add(tf.randomNormal(mb_s1.shape, 0, this.obs_noise)),
+              mb_s1.add(tf.randomNormal(mb_s1.shape, 0, global.obs_noise)),
               pred_next_actions
             ],
             {
-              batchSize: global.mb_len
+              batchSize: 2 * global.mb_len
             }
           )
           .mul(tf.scalar(global.discount))
@@ -85,13 +106,13 @@ export class DDPG {
       this.trainingCritic
         .fit(
           [
-            mb_s0.add(tf.randomNormal(mb_s0.shape, 0, this.obs_noise)),
+            mb_s0.add(tf.randomNormal(mb_s0.shape, 0, global.obs_noise)),
             mb_actions
           ],
           q_pred,
           {
             epochs: 1,
-            batchSize: global.mb_len,
+            batchSize: 2 * global.mb_len,
             yieldEvery: "never",
             shuffle: true
           }
@@ -106,19 +127,19 @@ export class DDPG {
                   .apply(
                     [
                       mb_s1.add(
-                        tf.randomNormal(mb_s1.shape, 0, this.obs_noise)
+                        tf.randomNormal(mb_s1.shape, 0, global.obs_noise)
                       ),
                       this.trainingActor.predict(
                         mb_s1.add(
-                          tf.randomNormal(mb_s1.shape, 0, this.obs_noise)
+                          tf.randomNormal(mb_s1.shape, 0, global.obs_noise)
                         ),
                         {
-                          batchSize: global.mb_len
+                          batchSize: 2 * global.mb_len
                         }
                       )
                     ],
                     {
-                      batchSize: global.mb_len
+                      batchSize: 2 * global.mb_len
                     }
                   )
                   .sum()
@@ -141,27 +162,35 @@ export class DDPG {
           tf.dispose(q_pred)
           // tf.dispose(q_now)
 
+          this.actorTau *= global.tauDecay
+          this.criticTau = global.tauDecay
+          if (this.actorTau < global.actorTauMin) {
+            this.actorTau = global.actorTauMin
+          }
+          if (this.criticTau < global.criticTauMin) {
+            this.criticTau = global.criticTauMin
+          }
           resolve()
         })
     })
   }
 
   updateActorWeights() {
-    this.updateWeights(this.targetActor, this.trainingActor)
+    this.updateWeights(this.targetActor, this.trainingActor, this.actorTau)
   }
 
   updateCriticWeights() {
-    this.updateWeights(this.targetCritic, this.trainingCritic)
+    this.updateWeights(this.targetCritic, this.trainingCritic, this.criticTau)
   }
 
-  updateWeights(target_model, training_model) {
+  updateWeights(target_model, training_model, tau) {
     tf.tidy(() => {
       const training_wts = training_model.getWeights()
       const target_wts = target_model.getWeights()
       for (let i = 0; i < training_wts.length; i++) {
         target_wts[i] = target_wts[i]
-          .mul(tf.scalar(1 - global.tau))
-          .add(training_wts[i].mul(tf.scalar(global.tau)))
+          .mul(tf.scalar(1 - tau))
+          .add(training_wts[i].mul(tf.scalar(tau)))
       }
       target_model.setWeights(target_wts)
     })

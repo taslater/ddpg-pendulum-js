@@ -4,15 +4,8 @@ import global from "./parameters.mjs"
 
 export class Pendulum {
   constructor() {
-    this.drag = 0.995
-    this.torque_mag = 0.003
     this.action
-    this.omega_lim = 0.5
-    this.noise_sigma = 0.05
-    this.noise_theta = 0.995
-    this.noise_mag = 4
-    this.noise_decay = 0.9997
-    this.noise_min = 0.5
+    this.noise_mag = global.noise_mag_initial
     this.zig = new Ziggurat()
     this.ddpg = new DDPG(this.state.length)
     this.reset()
@@ -23,19 +16,19 @@ export class Pendulum {
     this.theta = 2 * Math.PI * (Math.random() - 0.5)
     // this.prev_theta = this.theta
     this.omega = 0
-    this.noise = this.noise_mag * (0.5 - Math.random())
+    this.noise = 0.25 * this.noise_mag * (0.5 - Math.random())
     // this.noise = 0
     this.torque = 0
   }
 
   get reward() {
-    // return -Math.abs(this.theta)
+    return -Math.abs(this.theta)
     // return Math.cos(this.theta)
-    return -(
-      this.theta * this.theta * this.theta * this.theta +
-      0.1 * Math.abs(this.omega) * this.omega * this.omega +
-      0.01 * this.torque ** 2
-    )
+    // return -(
+    //   this.theta * this.theta * this.theta * this.theta +
+    //   0.1*Math.abs(this.omega) * this.omega * this.omega +
+    //   1 * this.torque ** 2
+    // )
     // return -(
     //   Math.abs(this.theta) +
     //   Math.abs(this.omega) +
@@ -50,26 +43,27 @@ export class Pendulum {
       csn,
       sn,
       10 * this.omega
+
       // 0.5 - Math.abs(this.theta) / Math.PI,
       // Math.cos(this.theta - this.omega) - csn,
       // Math.sin(this.theta - this.omega) - sn,
-      // this.theta > 0 ? 1 : -1,
-      // sn > 0 ? 1 : -1,
-      // this.omega > 0 ? 1 : -1,
+      // this.theta > 0 ? 1 : 0,
+      // sn > 0 ? 1 : 0,
+      // this.omega > 0 ? 1 : 0,
       // Math.abs(10 * this.omega)
     ]
   }
 
-  update(initial) {
+  update(training) {
     const s0 = this.state.slice()
     // this.prev_theta = this.theta
-    this.noise *= this.noise_theta
-    this.noise += this.noise_sigma * this.zig.nextGaussian()
+    this.noise *= global.noise_theta
+    this.noise += global.noise_sigma * this.zig.nextGaussian()
     this.action = 0
-    if (!initial) {
-      this.noise_mag *= this.noise_decay
-      if (this.noise_mag < this.noise_min) {
-        this.noise_mag = this.noise_min
+    if (training) {
+      this.noise_mag *= global.noise_decay
+      if (this.noise_mag < global.noise_min) {
+        this.noise_mag = global.noise_min
       }
       // tf.setBackend("cpu")
       this.action = tf.tidy(() => {
@@ -80,20 +74,21 @@ export class Pendulum {
           .dataSync()[0]
       })
     }
+    // this.action *= 1 - 0.5 * this.noise_mag
     if (this.action + this.noise * this.noise_mag > 1) {
-      this.noise = (0.8 - this.action) / this.noise_mag
+      this.noise = (1 - global.noise_bumper - this.action) / this.noise_mag
     } else if (this.action + this.noise * this.noise_mag < -1) {
-      this.noise = (-0.8 - this.action) / this.noise_mag
+      this.noise = (-(1 - global.noise_bumper) - this.action) / this.noise_mag
     }
     this.torque = this.action + this.noise * this.noise_mag
 
     const experience = { s0: s0, a: this.torque }
     const reward0 = this.reward
     this.omega +=
-      this.torque_mag * this.torque + global.g * Math.sin(this.theta)
-    this.omega *= this.drag
-    if (Math.abs(this.omega) > this.omega_lim) {
-      this.omega *= this.omega_lim / Math.abs(this.omega)
+      global.torque_mag * this.torque + global.g * Math.sin(this.theta)
+    this.omega *= global.drag
+    if (Math.abs(this.omega) > global.omega_lim) {
+      this.omega *= global.omega_lim / Math.abs(this.omega)
     }
     this.theta += this.omega
     if (this.theta > Math.PI) {

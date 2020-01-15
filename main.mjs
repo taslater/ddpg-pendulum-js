@@ -38,9 +38,9 @@ function toggleOverlay() {
 const pendulum = new Pendulum()
 let step = 0
 let episode = 0
-let done_training = true
 
 async function draw() {
+  let training = pendulum.ddpg.replay_buffer.data.length >= 2 * global.mb_len
   ctx.clearRect(0, 0, wh, wh)
   if (step >= global.ep_steps) {
     step = 0
@@ -48,10 +48,9 @@ async function draw() {
     pendulum.reset()
   }
   pendulum.show(ctx, wh)
-  pendulum.update(episode <= global.training_episodes)
-  if (episode > global.training_episodes && done_training) {
-    done_training = false
-    await pendulum.ddpg.train(step).then((done_training = true))
+  pendulum.update(training)
+  if (training) {
+    await pendulum.ddpg.train(step)
   }
   step++
   window.requestAnimationFrame(draw)
