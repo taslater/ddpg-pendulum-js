@@ -1,5 +1,6 @@
 import { Pendulum } from "./modules/pendulum.mjs"
 import global from "./modules/parameters.mjs"
+// importScripts("./parameters.js")
 
 // tf.setBackend("webgl")
 
@@ -35,25 +36,36 @@ function toggleOverlay() {
   controlsDiv.style.display = divs[0].style.display == "none" ? "block" : "none"
 }
 
+let ep_step = 0,
+  experience,
+  episode = 0
 const pendulum = new Pendulum()
-let step = 0
-let episode = 0
+const ddpg_worker = new Worker("./modules/ddpg_worker.js")
+ddpg_worker.postMessage({
+  settings: {
+    state_len: pendulum.state.length,
+    global: Object.assign({}, global)
+  }
+})
 
-async function draw() {
-  let training = pendulum.ddpg.replay_buffer.data.length >= 2 * global.mb_len
-  ctx.clearRect(0, 0, wh, wh)
-  if (step >= global.ep_steps) {
-    step = 0
+ddpg_worker.addEventListener("message", e => {
+  const action = e.data.action
+  experience = pendulum.update(action)
+  requestAnimationFrame(() => {
+    pendulum.show(ctx, wh)
+  })
+  ddpg_worker.postMessage({ experience: experience, ep_step: ep_step })
+  if (ep_step >= global.ep_steps) {
+    ep_step = 0
     episode++
     pendulum.reset()
   }
-  pendulum.show(ctx, wh)
-  pendulum.update(training)
-  if (training) {
-    await pendulum.ddpg.train(step)
-  }
-  step++
-  window.requestAnimationFrame(draw)
-}
+  ep_step++
+})
 
-draw()
+requestAnimationFrame(() => {
+  pendulum.show(ctx, wh)
+})
+experience = pendulum.update(0)
+ddpg_worker.postMessage({ experience: experience, ep_step: ep_step })
+ep_step++

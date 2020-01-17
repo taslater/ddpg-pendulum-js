@@ -1,4 +1,4 @@
-export function Actor(trainable, state_len) {
+function Actor(trainable, state_len) {
   const in_state = tf.input({ shape: [state_len] })
   const dense1 = tf.layers
     .dense({
@@ -37,7 +37,7 @@ export function Actor(trainable, state_len) {
   })
 }
 
-export function Critic(trainable, state_len) {
+function Critic(trainable, state_len) {
   const in_state = tf.input({ shape: [state_len] })
   const in_action = tf.input({ shape: [1] })
 

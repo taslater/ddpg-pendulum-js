@@ -1,4 +1,4 @@
-export default {
+const global = {
   ep_steps: 200,
 
   mb_len: 128,
@@ -29,3 +29,5 @@ export default {
   noise_decay: 0.9997,
   noise_min: 0.1
 }
+
+export default global

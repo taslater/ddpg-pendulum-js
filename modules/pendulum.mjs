@@ -1,5 +1,4 @@
 import { Ziggurat } from "./ziggurat.mjs"
-import { DDPG } from "./ddpg.mjs"
 import global from "./parameters.mjs"
 
 export class Pendulum {
@@ -7,7 +6,6 @@ export class Pendulum {
     this.action
     this.noise_mag = global.noise_mag_initial
     this.zig = new Ziggurat()
-    this.ddpg = new DDPG(this.state.length)
     this.reset()
     this.arc_display = 0.5 // radians
   }
@@ -53,25 +51,20 @@ export class Pendulum {
     ]
   }
 
-  update(training) {
+  update(action) {
+    this.action = action
     const s0 = this.state.slice()
     // this.prev_theta = this.theta
     this.noise *= global.noise_theta
     this.noise += global.noise_sigma * this.zig.nextGaussian()
-    this.action = 0
-    if (training) {
+    // this.action = 0
+    if (action !== 0) {
       this.noise_mag *= global.noise_decay
       if (this.noise_mag < global.noise_min) {
         this.noise_mag = global.noise_min
       }
       // tf.setBackend("cpu")
-      this.action = tf.tidy(() => {
-        return this.ddpg.targetActor
-          .predict(tf.tensor(s0, [1, s0.length]), {
-            batchSize: 1
-          })
-          .dataSync()[0]
-      })
+      // this.action = this.ddpg.getAction(s0)
     }
     // this.action *= 1 - 0.5 * this.noise_mag
     if (this.action + this.noise * this.noise_mag > 1) {
@@ -99,11 +92,13 @@ export class Pendulum {
     experience.r = reward1 - reward0
     // experience.r = reward1
     experience.s1 = this.state.slice()
-    this.ddpg.replay_buffer.add(Object.assign({}, experience))
+    // this.ddpg.replay_buffer.add(Object.assign({}, experience))
+    return Object.assign({}, experience)
   }
 
   show(ctx, wh) {
-    // ctx.globalAlpha = 0.9
+    ctx.clearRect(0, 0, wh, wh)
+
     ctx.lineCap = "round"
     ctx.strokeStyle = `rgb(30,30,30)`
     ctx.lineWidth = 3
