@@ -51,10 +51,11 @@ ddpg_worker.postMessage({
 ddpg_worker.addEventListener("message", e => {
   const action = e.data.action
   experience = pendulum.update(action)
+
   requestAnimationFrame(() => {
+    ddpg_worker.postMessage({ experience: experience, ep_step: ep_step })
     pendulum.show(ctx, wh)
   })
-  ddpg_worker.postMessage({ experience: experience, ep_step: ep_step })
   if (ep_step >= global.ep_steps) {
     ep_step = 0
     episode++

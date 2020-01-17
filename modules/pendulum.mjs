@@ -23,8 +23,8 @@ export class Pendulum {
     // return Math.cos(this.theta)
     // return -(
     //   this.theta * this.theta * this.theta * this.theta +
-    //   0.1*Math.abs(this.omega) * this.omega * this.omega +
-    //   1 * this.torque ** 2
+    //   Math.abs(this.omega) * this.omega * this.omega +
+    //   this.torque ** 2
     // )
     // return -(
     //   Math.abs(this.theta) +
@@ -97,15 +97,16 @@ export class Pendulum {
   }
 
   show(ctx, wh) {
+    const center = Math.floor(0.5 * wh)
     ctx.clearRect(0, 0, wh, wh)
 
-    ctx.lineCap = "round"
-    ctx.strokeStyle = `rgb(30,30,30)`
-    ctx.lineWidth = 3
+    ctx.lineCap = "butt"
+    ctx.strokeStyle = `rgb(100,100,100)`
+    ctx.lineWidth = 1
 
     ctx.beginPath()
-    ctx.moveTo(0.5 * wh, 0.05 * wh)
-    ctx.lineTo(0.5 * wh, 0.95 * wh)
+    ctx.moveTo(center, Math.floor(0.05 * wh))
+    ctx.lineTo(center, Math.floor(0.95 * wh))
     ctx.stroke()
 
     const _theta = this.theta - 0.5 * Math.PI
@@ -116,22 +117,22 @@ export class Pendulum {
     ctx.lineWidth = 0.06 * wh
 
     ctx.beginPath()
-    ctx.moveTo(0.5 * wh, 0.5 * wh)
+    ctx.moveTo(center, center)
     ctx.lineTo(
-      0.5 * wh * (1 + 2 * global.rRatio * Math.cos(_theta)),
-      0.5 * wh * (1 + 2 * global.rRatio * Math.sin(_theta))
+      Math.floor(center * (1 + 2 * global.rRatio * Math.cos(_theta))),
+      Math.floor(center * (1 + 2 * global.rRatio * Math.sin(_theta)))
     )
     ctx.stroke()
 
     ctx.lineCap = "butt"
     ctx.strokeStyle = "red"
-    ctx.lineWidth = 0.1 * wh * global.rRatio
+    ctx.lineWidth = Math.floor(0.1 * wh * global.rRatio)
 
     const _theta_torque = _theta - this.arc_display * this.torque
 
     let sorted_angles = [_theta, _theta_torque].sort((a, b) => a - b)
     ctx.beginPath()
-    ctx.arc(0.5 * wh, 0.5 * wh, wh * global.rRatio, ...sorted_angles)
+    ctx.arc(center, center, Math.floor(wh * global.rRatio), ...sorted_angles)
     ctx.stroke()
 
     ctx.strokeStyle = "blue"
@@ -140,7 +141,12 @@ export class Pendulum {
       (a, b) => a - b
     )
     ctx.beginPath()
-    ctx.arc(0.5 * wh, 0.5 * wh, 0.9 * wh * global.rRatio, ...sorted_angles)
+    ctx.arc(
+      center,
+      center,
+      Math.floor(0.9 * wh * global.rRatio),
+      ...sorted_angles
+    )
     ctx.stroke()
 
     ctx.strokeStyle = "green"
@@ -152,7 +158,7 @@ export class Pendulum {
         this.arc_display * this.noise * this.noise_mag
     ].sort((a, b) => a - b)
     ctx.beginPath()
-    ctx.arc(0.5 * wh, 0.5 * wh, 0.8 * wh * global.rRatio, ...sorted_angles)
+    ctx.arc(center, center, 0.8 * wh * global.rRatio, ...sorted_angles)
     ctx.stroke()
 
     ctx.lineCap = "round"
@@ -170,24 +176,24 @@ export class Pendulum {
     // clock-wise
     ctx.beginPath()
     ctx.moveTo(
-      0.5 * wh * (1 + (1.8 + lim_line_len) * global.rRatio * cw_lim_csn),
-      0.5 * wh * (1 + (1.8 + lim_line_len) * global.rRatio * cw_lim_sn)
+      center * (1 + (1.8 + lim_line_len) * global.rRatio * cw_lim_csn),
+      center * (1 + (1.8 + lim_line_len) * global.rRatio * cw_lim_sn)
     )
     ctx.lineTo(
-      0.5 * wh * (1 + (1.8 - lim_line_len) * global.rRatio * cw_lim_csn),
-      0.5 * wh * (1 + (1.8 - lim_line_len) * global.rRatio * cw_lim_sn)
+      center * (1 + (1.8 - lim_line_len) * global.rRatio * cw_lim_csn),
+      center * (1 + (1.8 - lim_line_len) * global.rRatio * cw_lim_sn)
     )
     ctx.stroke()
 
     // counter-clock-wise
     ctx.beginPath()
     ctx.moveTo(
-      0.5 * wh * (1 + (1.8 + lim_line_len) * global.rRatio * ccw_lim_csn),
-      0.5 * wh * (1 + (1.8 + lim_line_len) * global.rRatio * ccw_lim_sn)
+      center * (1 + (1.8 + lim_line_len) * global.rRatio * ccw_lim_csn),
+      center * (1 + (1.8 + lim_line_len) * global.rRatio * ccw_lim_sn)
     )
     ctx.lineTo(
-      0.5 * wh * (1 + (1.8 - lim_line_len) * global.rRatio * ccw_lim_csn),
-      0.5 * wh * (1 + (1.8 - lim_line_len) * global.rRatio * ccw_lim_sn)
+      center * (1 + (1.8 - lim_line_len) * global.rRatio * ccw_lim_csn),
+      center * (1 + (1.8 - lim_line_len) * global.rRatio * ccw_lim_sn)
     )
     ctx.stroke()
 
@@ -198,12 +204,12 @@ export class Pendulum {
     // connect torque and noise arcs
     ctx.beginPath()
     ctx.moveTo(
-      0.5 * wh * (1 + (1.8 + lim_line_len) * global.rRatio * torque_csn),
-      0.5 * wh * (1 + (1.8 + lim_line_len) * global.rRatio * torque_sn)
+      center * (1 + (1.8 + lim_line_len) * global.rRatio * torque_csn),
+      center * (1 + (1.8 + lim_line_len) * global.rRatio * torque_sn)
     )
     ctx.lineTo(
-      0.5 * wh * (1 + (1.8 - lim_line_len) * global.rRatio * torque_csn),
-      0.5 * wh * (1 + (1.8 - lim_line_len) * global.rRatio * torque_sn)
+      center * (1 + (1.8 - lim_line_len) * global.rRatio * torque_csn),
+      center * (1 + (1.8 - lim_line_len) * global.rRatio * torque_sn)
     )
     ctx.stroke()
 
@@ -211,8 +217,8 @@ export class Pendulum {
     ctx.lineCap = "round"
     ctx.lineWidth = 0.045 * wh
     ctx.beginPath()
-    ctx.moveTo(0.5 * wh, 0.5 * wh)
-    ctx.lineTo(0.5 * wh, 0.5 * wh)
+    ctx.moveTo(center, center)
+    ctx.lineTo(center, center)
     ctx.stroke()
   }
 }

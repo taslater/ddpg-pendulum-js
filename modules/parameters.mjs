@@ -1,17 +1,21 @@
 const global = {
   ep_steps: 200,
 
-  mb_len: 128,
+  mb_len: 64,
   buffer_len: 2e4,
   discount: 0.95,
 
-  actorTauInitial: 0.01,
+  get steps_before_training() {
+    return 4 * this.mb_len
+  },
+
+  actorTauInitial: 0.005,
   criticTauInitial: 0.01,
   tauDecay: 0.9999,
   actorTauMin: 0.001,
   criticTauMin: 0.001,
 
-  obs_noise: 0.001,
+  obs_noise: 0.01,
   // lr_alpha: 0.1,
   // training_episodes: 10,
 

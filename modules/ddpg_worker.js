@@ -29,8 +29,11 @@ onmessage = async e => {
     initialize(msg.settings.state_len, msg.settings.global)
   } else if (msg.hasOwnProperty("experience") && ready) {
     replay_buffer.add(msg.experience)
-    await train(msg.ep_step)
-    const action = getAction(msg.experience.s1)
+    let action = 0
+    if (replay_buffer.data.length > global.steps_before_training) {
+      await train(msg.ep_step)
+      action = getAction(msg.experience.s1)
+    }
     postMessage({ action: action })
   }
 }
@@ -69,8 +72,6 @@ function initialize(_state_len, _global) {
 }
 
 function getAction(state) {
-  if (replay_buffer.data.length < global.mb_len) return 0
-
   for (let i = 0; i < state.length; i++) {
     stateView[i] = state[i]
   }
@@ -84,8 +85,6 @@ function getAction(state) {
 }
 
 async function train(ep_step) {
-  if (replay_buffer.data.length < global.mb_len) return Promise.resolve()
-
   return new Promise((resolve, reject) => {
     replay_buffer.sample()
 
