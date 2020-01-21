@@ -7,7 +7,7 @@ export class Pendulum {
     this.noise_mag = global.noise_mag_initial
     this.zig = new Ziggurat()
     this.reset()
-    this.arc_display = 0.5 // radians
+    // this.arc_display = 0.5 // radians
   }
 
   reset() {

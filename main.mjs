@@ -1,4 +1,5 @@
 import { Pendulum } from "./modules/pendulum.mjs"
+import showPendulum from "./modules/showPendulum.mjs"
 import global from "./modules/parameters.mjs"
 // importScripts("./parameters.js")
 
@@ -21,20 +22,20 @@ function resizeCanvas() {
 resizeCanvas()
 window.onresize = resizeCanvas
 
-window.addEventListener("DOMContentLoaded", event => {
-  document
-    .getElementById("settings-btn")
-    .addEventListener("click", toggleOverlay)
-})
+// window.addEventListener("DOMContentLoaded", event => {
+//   document
+//     .getElementById("settings-btn")
+//     .addEventListener("click", toggleOverlay)
+// })
 
-function toggleOverlay() {
-  const divs = document.getElementsByClassName("blurbspace")
-  for (let div of divs) {
-    div.style.display = div.style.display == "none" ? "block" : "none"
-  }
-  const controlsDiv = document.getElementById("controls-div")
-  controlsDiv.style.display = divs[0].style.display == "none" ? "block" : "none"
-}
+// function toggleOverlay() {
+//   const divs = document.getElementsByClassName("blurbspace")
+//   for (let div of divs) {
+//     div.style.display = div.style.display == "none" ? "block" : "none"
+//   }
+//   const controlsDiv = document.getElementById("controls-div")
+//   controlsDiv.style.display = divs[0].style.display == "none" ? "block" : "none"
+// }
 
 let ep_step = 0,
   experience,

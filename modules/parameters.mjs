@@ -21,6 +21,7 @@ const global = {
 
   g: 0.004,
   rRatio: 0.4,
+  arc_display: 0.5,
   drag: 0.995,
   torque_mag: 0.002,
   omega_lim: 0.5,
