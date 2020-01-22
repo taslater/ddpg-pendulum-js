@@ -54,7 +54,7 @@ class ReplayBuffer {
     const mb_arr = []
     const idxs = []
     for (let i = 0; i < this.global.mb_len; i++) {
-      let attempts = 100
+      let attempts = 1000
       let rand_idx = Math.floor(this.data.length * Math.sqrt(Math.random()))
       while (attempts > 0 && idxs.includes(rand_idx)) {
         rand_idx = Math.floor(this.data.length * Math.sqrt(Math.random()))

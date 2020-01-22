@@ -2,11 +2,11 @@ function Actor(trainable, state_len) {
   const in_state = tf.input({ shape: [state_len] })
   const dense1 = tf.layers
     .dense({
-      units: 64,
+      units: 32,
       activation: "elu",
       // kernelRegularizer: tf.regularizers.l2({ l2: 1e-6 }),
       useBias: true,
-      biasInitializer: "zeros",
+      // biasInitializer: "zeros",
       trainable: trainable
     })
     .apply(in_state)
@@ -16,17 +16,17 @@ function Actor(trainable, state_len) {
       activation: "elu",
       // kernelRegularizer: tf.regularizers.l2({ l2: 1e-6 }),
       useBias: true,
-      biasInitializer: "zeros",
+      // biasInitializer: "zeros",
       trainable: trainable
     })
     .apply(dense1)
   const dense3 = tf.layers
     .dense({
-      units: 16,
+      units: 32,
       activation: "elu",
       // kernelRegularizer: tf.regularizers.l2({ l2: 1e-6 }),
       useBias: true,
-      biasInitializer: "zeros",
+      // biasInitializer: "zeros",
       trainable: trainable
     })
     .apply(dense2)
@@ -35,7 +35,7 @@ function Actor(trainable, state_len) {
       units: 1,
       activation: "tanh",
       useBias: true,
-      biasInitializer: "zeros",
+      // biasInitializer: "zeros",
       trainable: trainable
     })
     .apply(dense3)
@@ -57,7 +57,7 @@ function Critic(trainable, state_len) {
       activation: "elu",
       useBias: true,
       // kernelRegularizer: tf.regularizers.l2({ l2: 1e-6 }),
-      biasInitializer: "zeros",
+      // biasInitializer: "zeros",
       trainable: trainable
     })
     .apply(in_state)
@@ -68,27 +68,27 @@ function Critic(trainable, state_len) {
       activation: "elu",
       // kernelRegularizer: tf.regularizers.l2({ l2: 1e-6 }),
       useBias: true,
-      biasInitializer: "zeros",
+      // biasInitializer: "zeros",
       trainable: trainable
     })
     .apply(concat2)
   const dense3 = tf.layers
     .dense({
-      units: 64,
+      units: 128,
       activation: "elu",
       // kernelRegularizer: tf.regularizers.l2({ l2: 1e-6 }),
       useBias: true,
-      biasInitializer: "zeros",
+      // biasInitializer: "zeros",
       trainable: trainable
     })
     .apply(dense2)
   const dense4 = tf.layers
     .dense({
-      units: 32,
+      units: 128,
       activation: "elu",
       // kernelRegularizer: tf.regularizers.l2({ l2: 1e-6 }),
       useBias: true,
-      biasInitializer: "zeros",
+      // biasInitializer: "zeros",
       trainable: trainable
     })
     .apply(dense3)
@@ -97,7 +97,7 @@ function Critic(trainable, state_len) {
       units: 1,
       activation: "linear",
       useBias: true,
-      biasInitializer: "zeros",
+      // biasInitializer: "zeros",
       trainable: trainable
     })
     .apply(dense4)

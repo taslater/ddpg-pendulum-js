@@ -78,6 +78,7 @@ function initialize(_state_len, _global, _actorWeights) {
 }
 
 async function train() {
+  // console.log(tf.memory().numTensors)
   replay_buffer.sample()
 
   const mb_s0 = tf.tensor(
@@ -101,24 +102,38 @@ async function train() {
     "float32"
   )
 
-  const pred_next_actions = tf.tidy(() => {
-    return targetActor.predict(mb_s1, {
-      batchSize: global.mb_len
-    })
-  })
+  // const pred_next_actions = tf.tidy(() => {
+  //   return targetActor.predict(
+  //     mb_s1.add(tf.randomNormal(mb_s1.shape, 0, global.obs_noise)),
+  //     {
+  //       batchSize: global.mb_len
+  //     }
+  //   )
+  // })
 
   const q_pred = tf.tidy(() => {
     return targetCritic
-      .predict([mb_s1, pred_next_actions], {
-        batchSize: global.mb_len
-      })
+      .predict(
+        [
+          mb_s1.add(tf.randomNormal(mb_s1.shape, 0, global.obs_noise)),
+          targetActor.predict(
+            mb_s1.add(tf.randomNormal(mb_s1.shape, 0, global.obs_noise)),
+            {
+              batchSize: global.mb_len
+            }
+          )
+        ],
+        {
+          batchSize: global.mb_len
+        }
+      )
       .mul(tf.scalar(global.discount))
       .add(mb_rewards)
   })
 
-  // const mb_s0_noisy = tf.tidy(() => {
-  //   return mb_s0.add(tf.randomNormal(mb_s0.shape, 0, global.obs_noise))
-  // })
+  const mb_s0_noisy = tf.tidy(() => {
+    return mb_s0.add(tf.randomNormal(mb_s0.shape, 0, global.obs_noise))
+  })
 
   // const mb_s1_noisy0 = tf.tidy(() => {
   //   return mb_s1.add(tf.randomNormal(mb_s1.shape, 0, global.obs_noise))
@@ -128,7 +143,7 @@ async function train() {
   //   return mb_s1.add(tf.randomNormal(mb_s1.shape, 0, global.obs_noise))
   // })
 
-  await trainingCritic.fit([mb_s0, mb_actions], q_pred, {
+  await trainingCritic.fit([mb_s0_noisy, mb_actions], q_pred, {
     epochs: 1,
     batchSize: global.mb_len,
     yieldEvery: "never",
@@ -142,10 +157,13 @@ async function train() {
       return targetCritic
         .apply(
           [
-            mb_s1,
-            trainingActor.predict(mb_s1, {
-              batchSize: global.mb_len
-            })
+            mb_s0.add(tf.randomNormal(mb_s0.shape, 0, global.obs_noise)),
+            trainingActor.predict(
+              mb_s0.add(tf.randomNormal(mb_s0.shape, 0, global.obs_noise)),
+              {
+                batchSize: global.mb_len
+              }
+            )
           ],
           {
             batchSize: global.mb_len
@@ -154,21 +172,21 @@ async function train() {
         .sum()
         .mul(tf.scalar(-1))
     }, actorWeights).grads
-    for (let i = 0; i < grads.length; i++) {
-      grads[i] = grads[i].clipByValue(-1, 1)
-    }
+    // for (let i = 0; i < grads.length; i++) {
+    //   grads[i] = grads[i].clipByValue(-1, 1)
+    // }
     ac_optimizer.applyGradients(grads)
   })
 
   updateActorWeights()
 
   tf.dispose(mb_s0)
-  // tf.dispose(mb_s0_noisy)
+  tf.dispose(mb_s0_noisy)
   tf.dispose(mb_actions)
   tf.dispose(mb_rewards)
   tf.dispose(mb_s1)
   // tf.dispose(mb_s1_noisy)
-  tf.dispose(pred_next_actions)
+  // tf.dispose(pred_next_actions)
   tf.dispose(q_pred)
 
   decayTau()

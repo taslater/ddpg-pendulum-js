@@ -102,7 +102,7 @@ function reward() {
 function state() {
   const csn = Math.cos(theta),
     sn = Math.sin(theta)
-  return [csn, sn, 10 * omega]
+  return [csn, sn, 10 * omega, Math.abs(theta)]
 }
 
 function update() {
@@ -114,7 +114,7 @@ function update() {
   updatePhysics()
   const s1 = state().slice()
   const r1 = reward()
-  return { s0, a: action, r: r1 - r0, s1 }
+  return { s0, a: action, r: r1, s1 }
 }
 
 function updateAction() {
