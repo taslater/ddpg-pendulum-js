@@ -10,6 +10,7 @@ tf.setBackend("cpu")
 
 let theta, torque, action, noise, noise_sigma
 let global, state_len, targetActor
+const ddpg_worker = new Worker("./ddpg_worker.js")
 let ep_step = 0,
   episode = 0
 let zig = new Ziggurat()
@@ -39,6 +40,10 @@ function initialize(_global) {
   targetActor = Actor(false, state_len)
 
   initialized = true
+
+  ddpg_worker.postMessage({
+    settings: { global, state_len, actorWeights: targetActor.getWeights() }
+  })
 }
 
 function run() {
@@ -49,7 +54,9 @@ function run() {
   } else {
     ep_step++
   }
-  update()
+  ddpg_worker.postMessage({
+    experience: Object.assign({}, update())
+  })
   postMessage(Object.assign({}, animationState()))
 }
 

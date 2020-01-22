@@ -8,8 +8,6 @@ let wh
 let pendulumCanvas = document.getElementById("pendulum-canvas")
 let ctx = pendulumCanvas.getContext("2d")
 
-// const pendulum = new Pendulum()
-// const ddpg_worker = new Worker("./modules/ddpg_worker.js")
 const agent_worker = new Worker("./modules/agent_worker.js")
 // const animationQueue = []
 

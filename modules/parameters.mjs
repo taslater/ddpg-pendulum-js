@@ -6,7 +6,7 @@ const global = {
   discount: 0.95,
 
   get steps_before_training() {
-    return 4 * this.mb_len
+    return 1 * this.mb_len
   },
 
   actorTauInitial: 0.005,
