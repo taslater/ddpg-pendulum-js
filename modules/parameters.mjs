@@ -1,7 +1,7 @@
 const global = {
   ep_steps: 200,
 
-  mb_len: 64,
+  mb_len: 128,
   buffer_len: 2e4,
   discount: 0.95,
 
@@ -9,11 +9,11 @@ const global = {
     return 1 * this.mb_len
   },
 
-  actorTauInitial: 0.005,
+  actorTauInitial: 0.01,
   criticTauInitial: 0.01,
-  tauDecay: 0.9999,
-  actorTauMin: 0.001,
-  criticTauMin: 0.001,
+  tauDecay: 1,
+  actorTauMin: 0.01,
+  criticTauMin: 0.01,
 
   obs_noise: 0.01,
   // lr_alpha: 0.1,

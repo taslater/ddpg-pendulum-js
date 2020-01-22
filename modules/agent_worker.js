@@ -27,6 +27,22 @@ onmessage = e => {
   }
 }
 
+ddpg_worker.addEventListener("message", e => {
+  setTimeout(() => {
+    // targetActor.setWeights(e.data)
+    tf.tidy(() => {
+      const wts = targetActor.getWeights()
+      const new_wts = e.data
+      for (let i = 0; i < wts.length; i++) {
+        wts[i] = tf.tensor(new_wts[i], wts[i].shape)
+      }
+      targetActor.setWeights(wts)
+    })
+    noise_sigma *= global.noise_decay
+    // console.log(e.data)
+  }, 0)
+})
+
 function initialize(_global) {
   global = _global
 

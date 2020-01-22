@@ -77,14 +77,13 @@ function initialize(_state_len, _global, _actorWeights) {
   criticTau = global.criticTauInitial
 
   ready = true
-  // console.log(ready)
 }
 
 async function train() {
-  console.log("training")
-  console.log(replay_buffer.data.length)
-  console.log(tf.memory().numTensors)
-  // return new Promise((resolve, reject) => {
+  // console.log("training")
+  // console.log(replay_buffer.data.length)
+  // console.log(tf.memory().numTensors)
+
   replay_buffer.sample()
 
   const mb_s0 = tf.tensor(
@@ -181,6 +180,7 @@ async function train() {
   decayTau()
 
   setTimeout(() => {
+    postMessage(targetActor.getWeights().map(t => t.dataSync()))
     train()
   }, 0)
 }
