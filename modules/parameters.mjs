@@ -1,12 +1,12 @@
 const global = {
   ep_steps: 200,
 
-  mb_len: 128,
+  mb_len: 256,
   buffer_len: 2e4,
-  discount: 0.9,
+  discount: 0.98,
 
   get steps_before_training() {
-    return 4 * this.mb_len
+    return 2 * this.mb_len
   },
 
   actorTauInitial: 0.01,
@@ -26,12 +26,11 @@ const global = {
   torque_mag: 0.002,
   omega_lim: 0.5,
 
-  noise_sigma_initial: 0.3,
-  noise_theta: 0.98,
-  noise_bumper: 0.1,
-
+  noise_sigma_initial: 0.2,
+  noise_sigma_min: 0.01,
   noise_decay: 0.9997,
-  noise_min: 0.1
+  noise_theta: 0.98,
+  noise_bumper: 0.1
 }
 
 export default global

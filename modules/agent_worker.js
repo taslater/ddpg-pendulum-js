@@ -40,6 +40,9 @@ ddpg_worker.addEventListener("message", e => {
       targetActor.setWeights(wts)
     })
     noise_sigma *= global.noise_decay
+    if (noise_sigma < global.noise_sigma_min) {
+      noise_sigma = noise_sigma_min
+    }
     // console.log(e.data)
   }, 0)
 })
@@ -90,7 +93,10 @@ function reset() {
 }
 
 function reward() {
-  return -Math.abs(theta)
+  return 1 - Math.abs(theta / Math.PI)
+  // return (
+  //   -Math.abs(theta / Math.PI) - Math.abs((0.1 * torque) / global.torque_mag)
+  // )
 }
 
 function state() {

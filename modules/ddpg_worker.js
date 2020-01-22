@@ -181,7 +181,7 @@ async function train() {
 
 function decayTau() {
   actorTau *= global.tauDecay
-  criticTau = global.tauDecay
+  criticTau *= global.tauDecay
   if (actorTau < global.actorTauMin) {
     actorTau = global.actorTauMin
   }

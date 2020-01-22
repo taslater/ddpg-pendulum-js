@@ -27,7 +27,8 @@ class ReplayBuffer {
   }
   sample() {
     // const mb_arr = this.sample_without_replacement()
-    let mb = this.sample_from_recent_memory()
+    // let mb = this.sample_from_recent_memory()
+    let mb = this.sample_from_recent_memory_2()
     mb = shuffle(mb)
 
     for (let i = 0; i < this.global.mb_len; i++) {
@@ -38,46 +39,8 @@ class ReplayBuffer {
         this.mb_s1_view[i * this.state_len + j] = mb[i].s1[j]
       }
     }
-
-    // const mb_s0 = tf.tensor(
-    //   mb
-    //     .map(experience => experience.s0)
-    //     .concat(
-    //       mb.map(experience => [
-    //         experience.s0[0],
-    //         experience.s0[1] * -1,
-    //         experience.s0[2] * -1
-    //       ])
-    //     ),
-    //   [2 * global.mb_len, this.state_len]
-    // )
-    // const mb_actions = tf.tensor(
-    //   mb
-    //     .map(experience => experience.a)
-    //     .concat(mb.map(experience => experience.a * -1)),
-    //   [2 * global.mb_len, 1]
-    // )
-    // const mb_rewards = tf.tensor(
-    //   mb
-    //     .map(experience => experience.r)
-    //     .concat(mb.map(experience => experience.r)),
-    //   [2 * global.mb_len, 1]
-    // )
-    // const mb_s1 = tf.tensor(
-    //   mb
-    //     .map(experience => experience.s1)
-    //     .concat(
-    //       mb.map(experience => [
-    //         experience.s1[0],
-    //         experience.s1[1] * -1,
-    //         experience.s1[2] * -1
-    //       ])
-    //     ),
-    //   [2 * global.mb_len, this.state_len]
-    // )
-
-    // return mb
   }
+
   sample_from_recent_memory() {
     const mb_arr = []
     for (let i = 0; i < this.global.mb_len; i++) {
@@ -86,6 +49,23 @@ class ReplayBuffer {
     }
     return mb_arr
   }
+
+  sample_from_recent_memory_2() {
+    const mb_arr = []
+    const idxs = []
+    for (let i = 0; i < this.global.mb_len; i++) {
+      let attempts = 100
+      let rand_idx = Math.floor(this.data.length * Math.sqrt(Math.random()))
+      while (attempts > 0 && idxs.includes(rand_idx)) {
+        rand_idx = Math.floor(this.data.length * Math.sqrt(Math.random()))
+        attempts--
+      }
+      idxs.push(rand_idx)
+      mb_arr.push(this.data[rand_idx])
+    }
+    return mb_arr
+  }
+
   sample_without_replacement() {
     let idx_arr = [...Array(this.global.mb_len).keys()]
     idx_arr = shuffle(idx_arr)
