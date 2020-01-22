@@ -4,23 +4,23 @@ function Actor(trainable, state_len) {
     .dense({
       units: 64,
       activation: "elu",
-      kernelRegularizer: tf.regularizers.l2({ l2: 1e-6 }),
+      // kernelRegularizer: tf.regularizers.l2({ l2: 1e-6 }),
       trainable: trainable
     })
     .apply(in_state)
   const dense2 = tf.layers
     .dense({
-      units: 64,
+      units: 32,
       activation: "elu",
-      kernelRegularizer: tf.regularizers.l2({ l2: 1e-6 }),
+      // kernelRegularizer: tf.regularizers.l2({ l2: 1e-6 }),
       trainable: trainable
     })
     .apply(dense1)
   const dense3 = tf.layers
     .dense({
-      units: 64,
+      units: 16,
       activation: "elu",
-      kernelRegularizer: tf.regularizers.l2({ l2: 1e-6 }),
+      // kernelRegularizer: tf.regularizers.l2({ l2: 1e-6 }),
       trainable: trainable
     })
     .apply(dense2)
@@ -45,9 +45,9 @@ function Critic(trainable, state_len) {
   // "LeakyReLU"
   const dense1 = tf.layers
     .dense({
-      units: 128,
+      units: 256,
       activation: "elu",
-      kernelRegularizer: tf.regularizers.l2({ l2: 1e-6 }),
+      // kernelRegularizer: tf.regularizers.l2({ l2: 1e-6 }),
       trainable: trainable
     })
     .apply(in_state)
@@ -56,23 +56,23 @@ function Critic(trainable, state_len) {
     .dense({
       units: 128,
       activation: "elu",
-      kernelRegularizer: tf.regularizers.l2({ l2: 1e-6 }),
+      // kernelRegularizer: tf.regularizers.l2({ l2: 1e-6 }),
       trainable: trainable
     })
     .apply(concat2)
   const dense3 = tf.layers
     .dense({
-      units: 128,
+      units: 64,
       activation: "elu",
-      kernelRegularizer: tf.regularizers.l2({ l2: 1e-6 }),
+      // kernelRegularizer: tf.regularizers.l2({ l2: 1e-6 }),
       trainable: trainable
     })
     .apply(dense2)
   const dense4 = tf.layers
     .dense({
-      units: 128,
+      units: 32,
       activation: "elu",
-      kernelRegularizer: tf.regularizers.l2({ l2: 1e-6 }),
+      // kernelRegularizer: tf.regularizers.l2({ l2: 1e-6 }),
       trainable: trainable
     })
     .apply(dense3)

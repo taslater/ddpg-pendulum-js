@@ -1,12 +1,12 @@
 const global = {
   ep_steps: 200,
 
-  mb_len: 128,
+  mb_len: 256,
   buffer_len: 2e4,
   discount: 0.95,
 
   get steps_before_training() {
-    return 1 * this.mb_len
+    return 2 * this.mb_len
   },
 
   actorTauInitial: 0.01,
