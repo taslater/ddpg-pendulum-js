@@ -6,7 +6,7 @@ importScripts(
   "./nn_models.js"
 )
 
-// tf.enableProdMode()
+tf.enableProdMode()
 // tf.setBackend("cpu")
 
 let global,
@@ -58,8 +58,6 @@ function initialize(_state_len, _global, _actorWeights) {
   targetCritic = Critic(false, state_len)
   trainingCritic = Critic(true, state_len)
 
-  // targetActor.setWeights(_actorWeights)
-  // trainingActor.setWeights(_actorWeights)
   targetActor.setWeights(trainingActor.getWeights())
   targetCritic.setWeights(trainingCritic.getWeights())
   trainingCritic.compile({
@@ -80,10 +78,6 @@ function initialize(_state_len, _global, _actorWeights) {
 }
 
 async function train() {
-  // console.log("training")
-  // console.log(replay_buffer.data.length)
-  // console.log(tf.memory().numTensors)
-
   replay_buffer.sample()
 
   const mb_s0 = tf.tensor(

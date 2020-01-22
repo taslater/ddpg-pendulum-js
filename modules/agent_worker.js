@@ -6,6 +6,7 @@ importScripts(
   "./nn_models.js"
 )
 
+tf.enableProdMode()
 tf.setBackend("cpu")
 
 let theta, torque, action, noise, noise_sigma
@@ -107,7 +108,7 @@ function update() {
   updatePhysics()
   const s1 = state().slice()
   const r1 = reward()
-  return { s0, a: action, r: r1, s1 }
+  return { s0, a: action, r: r1 - r0, s1 }
 }
 
 function updateAction() {
