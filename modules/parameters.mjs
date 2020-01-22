@@ -26,11 +26,10 @@ const global = {
   torque_mag: 0.002,
   omega_lim: 0.5,
 
-  noise_sigma: 0.3,
+  noise_sigma_initial: 0.3,
   noise_theta: 0.99,
   noise_bumper: 0.1,
 
-  noise_mag_initial: 1,
   noise_decay: 0.9997,
   noise_min: 0.1
 }

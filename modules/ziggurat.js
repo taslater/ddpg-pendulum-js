@@ -1,6 +1,6 @@
 // https://filosophy.org/code/normal-distributed-random-values-in-javascript-using-the-ziggurat-algorithm/
 
-export function Ziggurat() {
+function Ziggurat() {
   var jsr = 123456789
 
   var wn = Array(128)

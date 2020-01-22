@@ -1,7 +1,10 @@
 import global from "./parameters.mjs"
 
 export default function showPendulum(ctx, wh, animationState) {
-  const theta = animationState.theta, 
+  const theta = animationState.theta,
+    torque = animationState.torque,
+    action = animationState.action,
+    noise = animationState.noise
 
   const center = Math.floor(0.5 * wh)
   ctx.clearRect(0, 0, wh, wh)
@@ -43,7 +46,7 @@ export default function showPendulum(ctx, wh, animationState) {
 
   ctx.strokeStyle = "blue"
   // ctx.lineWidth = 10
-  sorted_angles = [_theta, _theta - arc_display * action].sort(
+  sorted_angles = [_theta, _theta - global.arc_display * action].sort(
     (a, b) => a - b
   )
   ctx.beginPath()
@@ -58,10 +61,8 @@ export default function showPendulum(ctx, wh, animationState) {
   ctx.strokeStyle = "green"
   // ctx.lineWidth = 10
   sorted_angles = [
-    _theta - arc_display * torque,
-    _theta -
-      arc_display * torque +
-      arc_display * noise * noise_mag
+    _theta - global.arc_display * torque,
+    _theta - global.arc_display * torque + global.arc_display * noise
   ].sort((a, b) => a - b)
   ctx.beginPath()
   ctx.arc(center, center, 0.8 * wh * global.rRatio, ...sorted_angles)
@@ -71,10 +72,10 @@ export default function showPendulum(ctx, wh, animationState) {
   ctx.strokeStyle = `rgb(100,100,100)`
   ctx.lineWidth = 3
 
-  const cw_lim = _theta - arc_display,
+  const cw_lim = _theta - global.arc_display,
     cw_lim_sn = Math.sin(cw_lim),
     cw_lim_csn = Math.cos(cw_lim),
-    ccw_lim = _theta + arc_display,
+    ccw_lim = _theta + global.arc_display,
     ccw_lim_sn = Math.sin(ccw_lim),
     ccw_lim_csn = Math.cos(ccw_lim),
     lim_line_len = 0.3

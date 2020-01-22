@@ -8,12 +8,10 @@ let wh
 let pendulumCanvas = document.getElementById("pendulum-canvas")
 let ctx = pendulumCanvas.getContext("2d")
 
-let ep_step = 0,
-  experience,
-  episode = 0
 // const pendulum = new Pendulum()
 // const ddpg_worker = new Worker("./modules/ddpg_worker.js")
-const animationQueue = []
+const agent_worker = new Worker("./modules/agent_worker.js")
+// const animationQueue = []
 
 function resizeCanvas() {
   let navbarHeight = document.getElementById("navbar").offsetHeight
@@ -28,47 +26,14 @@ function resizeCanvas() {
 resizeCanvas()
 window.onresize = resizeCanvas
 
-// window.addEventListener("DOMContentLoaded", event => {
-//   document
-//     .getElementById("settings-btn")
-//     .addEventListener("click", toggleOverlay)
-// })
+agent_worker.addEventListener("message", e => {
+  requestAnimationFrame(() => {
+    showPendulum(ctx, wh, e.data)
+    agent_worker.postMessage("next frame")
+  })
+})
 
-// function toggleOverlay() {
-//   const divs = document.getElementsByClassName("blurbspace")
-//   for (let div of divs) {
-//     div.style.display = div.style.display == "none" ? "block" : "none"
-//   }
-//   const controlsDiv = document.getElementById("controls-div")
-//   controlsDiv.style.display = divs[0].style.display == "none" ? "block" : "none"
-// }
-
-// ddpg_worker.postMessage({
-//   settings: {
-//     state_len: pendulum.state.length,
-//     global: Object.assign({}, global)
-//   }
-// })
-
-// ddpg_worker.addEventListener("message", e => {
-//   const action = e.data.action
-//   experience = pendulum.update(action)
-
-//   requestAnimationFrame(() => {
-//     ddpg_worker.postMessage({ experience: experience, ep_step: ep_step })
-//     pendulum.show(ctx, wh)
-//   })
-//   if (ep_step >= global.ep_steps) {
-//     ep_step = 0
-//     episode++
-//     pendulum.reset()
-//   }
-//   ep_step++
-// })
-
-// requestAnimationFrame(() => {
-//   pendulum.show(ctx, wh)
-// })
-// experience = pendulum.update(0)
-// ddpg_worker.postMessage({ experience: experience, ep_step: ep_step })
-// ep_step++
+// debugger
+agent_worker.postMessage({
+  global
+})
