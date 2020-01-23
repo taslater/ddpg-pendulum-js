@@ -11,7 +11,6 @@ tf.setBackend("cpu")
 
 let theta, torque, action, noise, noise_sigma
 let global, state_len, targetActor
-const ddpg_worker = new Worker("./ddpg_worker.js")
 let ep_step = 0,
   episode = 0
 let zig = new Ziggurat()
@@ -25,27 +24,23 @@ onmessage = e => {
     run()
   } else if (initialized && msg == "next frame") {
     run()
+  } else if (msg.hasOwnProperty("newActorWts")) {
+    setTimeout(() => {
+      tf.tidy(() => {
+        const wts = targetActor.getWeights()
+        const new_wts = msg.newActorWts
+        for (let i = 0; i < wts.length; i++) {
+          wts[i] = tf.tensor(new_wts[i], wts[i].shape)
+        }
+        targetActor.setWeights(wts)
+      })
+      noise_sigma *= global.noise_decay
+      if (noise_sigma < global.noise_sigma_min) {
+        noise_sigma = noise_sigma_min
+      }
+    }, 0)
   }
 }
-
-ddpg_worker.addEventListener("message", e => {
-  setTimeout(() => {
-    // targetActor.setWeights(e.data)
-    tf.tidy(() => {
-      const wts = targetActor.getWeights()
-      const new_wts = e.data
-      for (let i = 0; i < wts.length; i++) {
-        wts[i] = tf.tensor(new_wts[i], wts[i].shape)
-      }
-      targetActor.setWeights(wts)
-    })
-    noise_sigma *= global.noise_decay
-    if (noise_sigma < global.noise_sigma_min) {
-      noise_sigma = noise_sigma_min
-    }
-    // console.log(e.data)
-  }, 0)
-})
 
 function initialize(_global) {
   global = _global
@@ -61,8 +56,9 @@ function initialize(_global) {
 
   initialized = true
 
-  ddpg_worker.postMessage({
-    settings: { global, state_len, actorWeights: targetActor.getWeights() }
+  postMessage({
+    state_len,
+    actorWeights: targetActor.getWeights().map(t => t.dataSync())
   })
 }
 
@@ -74,10 +70,11 @@ function run() {
   } else {
     ep_step++
   }
-  ddpg_worker.postMessage({
-    experience: Object.assign({}, update())
+  const experience = update()
+  postMessage({
+    animationState: Object.assign({}, animationState()),
+    experience: Object.assign({}, experience)
   })
-  postMessage(Object.assign({}, animationState()))
 }
 
 function animationState() {

@@ -43,7 +43,6 @@ onmessage = async e => {
       training = true
       train()
     }
-    // postMessage({ action: action })
   }
 }
 
@@ -58,7 +57,17 @@ function initialize(_state_len, _global, _actorWeights) {
   targetCritic = Critic(false, state_len)
   trainingCritic = Critic(true, state_len)
 
-  targetActor.setWeights(trainingActor.getWeights())
+  tf.tidy(() => {
+    const wts = trainingActor.getWeights()
+    const new_wts = _actorWeights
+    for (let i = 0; i < wts.length; i++) {
+      wts[i] = tf.tensor(new_wts[i], wts[i].shape)
+    }
+    targetActor.setWeights(wts)
+    trainingActor.setWeights(wts)
+  })
+
+  // targetActor.setWeights(trainingActor.getWeights())
   targetCritic.setWeights(trainingCritic.getWeights())
   trainingCritic.compile({
     optimizer: tf.train.adam(0.001),
@@ -101,15 +110,6 @@ async function train() {
     [global.mb_len, state_len],
     "float32"
   )
-
-  // const pred_next_actions = tf.tidy(() => {
-  //   return targetActor.predict(
-  //     mb_s1.add(tf.randomNormal(mb_s1.shape, 0, global.obs_noise)),
-  //     {
-  //       batchSize: global.mb_len
-  //     }
-  //   )
-  // })
 
   const q_pred = tf.tidy(() => {
     return targetCritic
@@ -172,9 +172,9 @@ async function train() {
         .sum()
         .mul(tf.scalar(-1))
     }, actorWeights).grads
-    // for (let i = 0; i < grads.length; i++) {
-    //   grads[i] = grads[i].clipByValue(-1, 1)
-    // }
+    for (let i = 0; i < grads.length; i++) {
+      grads[i] = grads[i].clipByValue(-1, 1)
+    }
     ac_optimizer.applyGradients(grads)
   })
 
@@ -186,13 +186,14 @@ async function train() {
   tf.dispose(mb_rewards)
   tf.dispose(mb_s1)
   // tf.dispose(mb_s1_noisy)
-  // tf.dispose(pred_next_actions)
   tf.dispose(q_pred)
 
   decayTau()
 
   setTimeout(() => {
-    postMessage(targetActor.getWeights().map(t => t.dataSync()))
+    postMessage({
+      newActorWts: targetActor.getWeights().map(t => t.dataSync())
+    })
     train()
   }, 0)
 }
