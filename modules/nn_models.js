@@ -53,7 +53,7 @@ function Critic(trainable, state_len) {
   // "LeakyReLU"
   const dense1 = tf.layers
     .dense({
-      units: 256,
+      units: 128,
       activation: "elu",
       useBias: true,
       // kernelRegularizer: tf.regularizers.l2({ l2: 1e-6 }),

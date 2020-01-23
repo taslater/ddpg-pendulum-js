@@ -1,9 +1,9 @@
 const global = {
   ep_steps: 300,
 
-  mb_len: 128,
+  mb_len: 256,
   buffer_len: 2e4,
-  discount: 0.995,
+  discount: 0.97,
 
   get steps_before_training() {
     return Math.max(4 * this.mb_len, 1.1 * this.mb_len)
@@ -15,7 +15,7 @@ const global = {
   actorTauMin: 0.002,
   criticTauMin: 0.002,
 
-  obs_noise: 2e-3,
+  obs_noise: 1e-3,
   // lr_alpha: 0.1,
   // training_episodes: 10,
 
@@ -29,7 +29,7 @@ const global = {
   noise_sigma_initial: 0.2,
   noise_sigma_min: 0.02,
   noise_decay: 0.9998,
-  noise_theta: 0.98,
+  noise_theta: 0.95,
   noise_bumper: 0.1
 }
 
