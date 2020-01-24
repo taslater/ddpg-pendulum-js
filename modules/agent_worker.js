@@ -36,7 +36,7 @@ onmessage = e => {
       })
       noise_sigma *= global.noise_decay
       if (noise_sigma < global.noise_sigma_min) {
-        noise_sigma = noise_sigma_min
+        noise_sigma = global.noise_sigma_min
       }
     }, 0)
   }
@@ -84,22 +84,23 @@ function animationState() {
 function reset() {
   theta = 2 * Math.PI * (Math.random() - 0.5)
   omega = 0
-  noise = noise_sigma * (0.5 - Math.random())
+  noise = 2 * noise_sigma * (0.5 - Math.random())
+  // noise = 0
   action = 0
   updateTorque()
 }
 
 function reward() {
-  return 1 - Math.abs(theta / Math.PI)
-  // return (
-  //   -Math.abs(theta / Math.PI) - Math.abs((0.1 * torque) / global.torque_mag)
-  // )
+  // return 0.5 - Math.abs(theta / Math.PI)
+  let _theta = theta / Math.PI
+  return -_theta * _theta
+  // return -Math.abs(theta / Math.PI) - 0.01 * Math.abs(action)
 }
 
 function state() {
   const csn = Math.cos(theta),
     sn = Math.sin(theta)
-  return [csn, sn, 10 * omega, Math.abs(theta)]
+  return [csn, sn, 10 * omega]
 }
 
 function update() {

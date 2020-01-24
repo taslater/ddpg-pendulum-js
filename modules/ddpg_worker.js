@@ -12,19 +12,30 @@ tf.enableProdMode()
 let global,
   state_len,
   replay_buffer,
+  //
   trainingActor,
   targetActor,
   trainingCritic,
   targetCritic,
-  ac_optimizer,
+  valueCritic,
+  //
+  actor_optimizer,
+  critic_optimizer,
+  value_optimizer,
+  //
   actorWeights = [],
+  criticWeights = [],
+  valueWeights = [],
+  //
   actorTau,
   criticTau,
+  //
   stateBuffer,
   stateView
 
 let ready = false,
-  training = false
+  training = false,
+  criticUpdatesSinceActorUpdate = 0
 
 onmessage = async e => {
   const msg = e.data
@@ -35,9 +46,9 @@ onmessage = async e => {
       msg.settings.actorWeights
     )
   } else if (ready && msg.hasOwnProperty("experience")) {
-    setTimeout(() => {
-      replay_buffer.add(msg.experience)
-    }, 20)
+    // setTimeout(() => {
+    replay_buffer.add(msg.experience)
+    // }, 20)
     // let action = 0
     if (!training && replay_buffer.data.length > global.steps_before_training) {
       training = true
@@ -56,6 +67,7 @@ function initialize(_state_len, _global, _actorWeights) {
   trainingActor = Actor(true, state_len)
   targetCritic = Critic(false, state_len)
   trainingCritic = Critic(true, state_len)
+  valueCritic = ValueCritic(true, state_len)
 
   tf.tidy(() => {
     const wts = trainingActor.getWeights()
@@ -66,18 +78,20 @@ function initialize(_state_len, _global, _actorWeights) {
     targetActor.setWeights(wts)
     trainingActor.setWeights(wts)
   })
-
-  // targetActor.setWeights(trainingActor.getWeights())
   targetCritic.setWeights(trainingCritic.getWeights())
-  trainingCritic.compile({
-    optimizer: tf.train.adam(0.001),
-    loss: tf.losses.meanSquaredError
-  })
 
-  ac_optimizer = tf.train.adam(0.001)
+  actor_optimizer = tf.train.adam(0.001)
+  critic_optimizer = tf.train.adam(0.001)
+  value_optimizer = tf.train.adam(0.001)
 
   for (let i = 0; i < trainingActor.trainableWeights.length; i++) {
     actorWeights.push(trainingActor.trainableWeights[i].val)
+  }
+  for (let i = 0; i < trainingCritic.trainableWeights.length; i++) {
+    criticWeights.push(trainingCritic.trainableWeights[i].val)
+  }
+  for (let i = 0; i < valueCritic.trainableWeights.length; i++) {
+    valueWeights.push(valueCritic.trainableWeights[i].val)
   }
 
   actorTau = global.actorTauInitial
@@ -111,91 +125,143 @@ async function train() {
     "float32"
   )
 
-  const q_pred = tf.tidy(() => {
-    return targetCritic
-      .predict(
-        [
-          mb_s1.add(tf.randomNormal(mb_s1.shape, 0, global.obs_noise)),
-          targetActor.predict(
-            mb_s1.add(tf.randomNormal(mb_s1.shape, 0, global.obs_noise)),
-            {
-              batchSize: global.mb_len
-            }
-          )
-        ],
-        {
-          batchSize: global.mb_len
-        }
-      )
-      .mul(tf.scalar(global.discount))
-      .add(mb_rewards)
-  })
-
-  const mb_s0_noisy = tf.tidy(() => {
-    return mb_s0.add(tf.randomNormal(mb_s0.shape, 0, global.obs_noise))
-  })
-
-  // const mb_s1_noisy0 = tf.tidy(() => {
-  //   return mb_s1.add(tf.randomNormal(mb_s1.shape, 0, global.obs_noise))
-  // })
-
-  // const mb_s1_noisy1 = tf.tidy(() => {
-  //   return mb_s1.add(tf.randomNormal(mb_s1.shape, 0, global.obs_noise))
-  // })
-
-  await trainingCritic.fit([mb_s0_noisy, mb_actions], q_pred, {
-    epochs: 1,
-    batchSize: global.mb_len,
-    yieldEvery: "never",
-    shuffle: true
-  })
-
-  updateCriticWeights()
-
   tf.tidy(() => {
-    const grads = ac_optimizer.computeGradients(() => {
-      return targetCritic
-        .apply(
+    const grads = critic_optimizer.computeGradients(() => {
+      return trainingCritic
+        .predict(
           [
-            mb_s0.add(tf.randomNormal(mb_s0.shape, 0, global.obs_noise)),
-            trainingActor.predict(
-              mb_s0.add(tf.randomNormal(mb_s0.shape, 0, global.obs_noise)),
-              {
-                batchSize: global.mb_len
-              }
-            )
+            mb_s0.add(
+              tf.randomNormal(mb_s0.shape, 0, global.training_critic_obs_noise)
+            ),
+            mb_actions
           ],
           {
             batchSize: global.mb_len
           }
         )
+        .squaredDifference(
+          targetCritic
+            .predict(
+              [
+                mb_s1.add(
+                  tf.randomNormal(
+                    mb_s1.shape,
+                    0,
+                    global.target_critic_obs_noise
+                  )
+                ),
+                targetActor.predict(
+                  mb_s1.add(
+                    tf.randomNormal(
+                      mb_s1.shape,
+                      0,
+                      global.target_actor_obs_noise
+                    )
+                  ),
+                  {
+                    batchSize: global.mb_len
+                  }
+                )
+              ],
+              {
+                batchSize: global.mb_len
+              }
+            )
+            .mul(tf.scalar(global.discount))
+            .add(mb_rewards)
+        )
         .sum()
-        .mul(tf.scalar(-1))
-    }, actorWeights).grads
+    }, criticWeights).grads
     for (let i = 0; i < grads.length; i++) {
       grads[i] = grads[i].clipByValue(-1, 1)
     }
-    ac_optimizer.applyGradients(grads)
+    critic_optimizer.applyGradients(grads)
   })
 
-  updateActorWeights()
+  updateCriticWeights()
 
-  tf.dispose(mb_s0)
-  tf.dispose(mb_s0_noisy)
-  tf.dispose(mb_actions)
-  tf.dispose(mb_rewards)
-  tf.dispose(mb_s1)
-  // tf.dispose(mb_s1_noisy)
-  tf.dispose(q_pred)
+  // tf.tidy(() => {
+  //   const grads = value_optimizer.computeGradients(() => {
+  //     return targetCritic
+  //       .predict([mb_s0, mb_actions], {
+  //         batchSize: global.mb_len
+  //       })
+  //       .squaredDifference(
+  //         valueCritic.predict(mb_s0, {
+  //           batchSize: global.mb_len
+  //         })
+  //       )
+  //       .sum()
+  //   }, valueWeights).grads
+  //   for (let i = 0; i < grads.length; i++) {
+  //     grads[i] = grads[i].clipByValue(-1, 1)
+  //   }
+  //   value_optimizer.applyGradients(grads)
+  // })
 
-  decayTau()
+  if (criticUpdatesSinceActorUpdate > 3) {
+    tf.tidy(() => {
+      const grads = actor_optimizer.computeGradients(() => {
+        return (
+          targetCritic
+            .apply(
+              [
+                mb_s1.add(
+                  tf.randomNormal(
+                    mb_s0.shape,
+                    0,
+                    global.target_critic_obs_noise
+                  )
+                ),
+                trainingActor.predict(
+                  mb_s1.add(
+                    tf.randomNormal(
+                      mb_s0.shape,
+                      0,
+                      global.training_actor_obs_noise
+                    )
+                  ),
+                  {
+                    batchSize: global.mb_len
+                  }
+                )
+              ],
+              {
+                batchSize: global.mb_len
+              }
+            )
+            // .sub(valueCritic.predict(mb_s1), {
+            //   batchSize: global.mb_len
+            // })
+            .sum()
+            .mul(tf.scalar(-1))
+        )
+      }, actorWeights).grads
+      for (let i = 0; i < grads.length; i++) {
+        grads[i] = grads[i].clipByValue(-1, 1)
+      }
+      actor_optimizer.applyGradients(grads)
+    })
 
-  setTimeout(() => {
+    updateActorWeights()
+
     postMessage({
       newActorWts: targetActor.getWeights().map(t => t.dataSync())
     })
-    train()
-  }, 0)
+  }
+
+  tf.dispose(mb_s0)
+  tf.dispose(mb_actions)
+  tf.dispose(mb_rewards)
+  tf.dispose(mb_s1)
+
+  decayTau()
+
+  // setTimeout(() => {
+
+  training = false
+  // train()
+  // }, 0)
 }
 
 function decayTau() {
@@ -209,12 +275,14 @@ function decayTau() {
   }
 }
 
-function updateActorWeights() {
-  updateWeights(targetActor, trainingActor, actorTau)
-}
-
 function updateCriticWeights() {
   updateWeights(targetCritic, trainingCritic, criticTau)
+  criticUpdatesSinceActorUpdate++
+}
+
+function updateActorWeights() {
+  updateWeights(targetActor, trainingActor, actorTau)
+  criticUpdatesSinceActorUpdate = 0
 }
 
 function updateWeights(target_model, training_model, tau) {

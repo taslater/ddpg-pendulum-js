@@ -1,21 +1,26 @@
 const global = {
   ep_steps: 300,
 
-  mb_len: 256,
+  mb_len: 64,
   buffer_len: 2e4,
-  discount: 0.97,
+  discount: 0.95,
 
   get steps_before_training() {
-    return Math.max(4 * this.mb_len, 1.1 * this.mb_len)
+    return Math.max(8 * this.mb_len, 1.1 * this.mb_len, 900)
   },
 
   actorTauInitial: 0.01,
   criticTauInitial: 0.01,
-  tauDecay: 0.99995,
-  actorTauMin: 0.002,
-  criticTauMin: 0.002,
+  tauDecay: 1,
+  actorTauMin: 0.01,
+  criticTauMin: 0.01,
 
-  obs_noise: 1e-3,
+  // obs_noise: 1e-3,
+  training_critic_obs_noise: 1e-3,
+  target_critic_obs_noise: 0,
+  training_actor_obs_noise: 1e-3,
+  target_actor_obs_noise: 0,
+
   // lr_alpha: 0.1,
   // training_episodes: 10,
 
@@ -28,8 +33,8 @@ const global = {
 
   noise_sigma_initial: 0.2,
   noise_sigma_min: 0.02,
-  noise_decay: 0.9998,
-  noise_theta: 0.95,
+  noise_decay: 1 - 0.0001,
+  noise_theta: 1 - 0.03,
   noise_bumper: 0.1
 }
 
