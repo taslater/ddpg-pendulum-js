@@ -17,15 +17,15 @@ let global,
   targetActor,
   trainingCritic,
   targetCritic,
-  valueCritic,
+  // valueCritic,
   //
   actor_optimizer,
   critic_optimizer,
-  value_optimizer,
+  // value_optimizer,
   //
   actorWeights = [],
   criticWeights = [],
-  valueWeights = [],
+  // valueWeights = [],
   //
   actorTau,
   criticTau,
@@ -67,7 +67,7 @@ function initialize(_state_len, _global, _actorWeights) {
   trainingActor = Actor(true, state_len)
   targetCritic = Critic(false, state_len)
   trainingCritic = Critic(true, state_len)
-  valueCritic = ValueCritic(true, state_len)
+  // valueCritic = ValueCritic(true, state_len)
 
   tf.tidy(() => {
     const wts = trainingActor.getWeights()
@@ -80,9 +80,9 @@ function initialize(_state_len, _global, _actorWeights) {
   })
   targetCritic.setWeights(trainingCritic.getWeights())
 
-  actor_optimizer = tf.train.adam(0.001)
-  critic_optimizer = tf.train.adam(0.001)
-  value_optimizer = tf.train.adam(0.001)
+  actor_optimizer = tf.train.adam(global.actorLR)
+  critic_optimizer = tf.train.adam(global.criticLR)
+  // value_optimizer = tf.train.adam(0.001)
 
   for (let i = 0; i < trainingActor.trainableWeights.length; i++) {
     actorWeights.push(trainingActor.trainableWeights[i].val)
@@ -90,9 +90,9 @@ function initialize(_state_len, _global, _actorWeights) {
   for (let i = 0; i < trainingCritic.trainableWeights.length; i++) {
     criticWeights.push(trainingCritic.trainableWeights[i].val)
   }
-  for (let i = 0; i < valueCritic.trainableWeights.length; i++) {
-    valueWeights.push(valueCritic.trainableWeights[i].val)
-  }
+  // for (let i = 0; i < valueCritic.trainableWeights.length; i++) {
+  //   valueWeights.push(valueCritic.trainableWeights[i].val)
+  // }
 
   actorTau = global.actorTauInitial
   criticTau = global.criticTauInitial
@@ -199,7 +199,7 @@ async function train() {
   //   value_optimizer.applyGradients(grads)
   // })
 
-  if (criticUpdatesSinceActorUpdate > 3) {
+  if (criticUpdatesSinceActorUpdate > 2) {
     tf.tidy(() => {
       const grads = actor_optimizer.computeGradients(() => {
         return (

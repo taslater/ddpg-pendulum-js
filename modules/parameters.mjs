@@ -1,13 +1,16 @@
 const global = {
-  ep_steps: 300,
+  ep_steps: 400,
 
-  mb_len: 64,
+  mb_len: 128,
   buffer_len: 2e4,
   discount: 0.95,
 
   get steps_before_training() {
-    return Math.max(8 * this.mb_len, 1.1 * this.mb_len, 900)
+    return Math.max(8 * this.mb_len, 600)
   },
+
+  actorLR: 0.001,
+  criticLR: 0.001,
 
   actorTauInitial: 0.01,
   criticTauInitial: 0.01,
@@ -31,9 +34,9 @@ const global = {
   torque_mag: 0.0015,
   omega_lim: 0.5,
 
-  noise_sigma_initial: 0.2,
-  noise_sigma_min: 0.02,
-  noise_decay: 1 - 0.0001,
+  noise_sigma_initial: 0.3,
+  noise_sigma_min: 0.05,
+  noise_decay: 1 - 0.0005,
   noise_theta: 1 - 0.03,
   noise_bumper: 0.1
 }

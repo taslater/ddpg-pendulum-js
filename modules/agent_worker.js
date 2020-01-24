@@ -9,9 +9,16 @@ importScripts(
 tf.enableProdMode()
 tf.setBackend("cpu")
 
-let theta, torque, action, noise, noise_sigma
-let global, state_len, targetActor
-let ep_step = 0,
+let theta = 2 * Math.PI * (Math.random() - 0.5),
+  omega = 0,
+  noise = 1 - 2 * Math.random(),
+  action = 0,
+  torque = action + noise,
+  global,
+  state_len,
+  targetActor,
+  noise_sigma,
+  ep_step = 0,
   episode = 0
 let zig = new Ziggurat()
 let initialized = false
@@ -46,7 +53,7 @@ function initialize(_global) {
   global = _global
 
   noise_sigma = global.noise_sigma_initial
-  reset()
+  // reset()
   state_len = state().length
 
   stateBuffer = new ArrayBuffer(4 * state_len)
@@ -60,6 +67,8 @@ function initialize(_global) {
     state_len,
     actorWeights: targetActor.getWeights().map(t => t.dataSync())
   })
+
+  reset()
 }
 
 function run() {
@@ -84,16 +93,16 @@ function animationState() {
 function reset() {
   theta = 2 * Math.PI * (Math.random() - 0.5)
   omega = 0
-  noise = 2 * noise_sigma * (0.5 - Math.random())
-  // noise = 0
-  action = 0
+  noise = 1 - 2 * Math.random()
+  updateAction()
+  updateNoise()
   updateTorque()
 }
 
 function reward() {
   // return 0.5 - Math.abs(theta / Math.PI)
-  let _theta = theta / Math.PI
-  return -_theta * _theta
+  let _theta = Math.abs(theta / Math.PI)
+  return -_theta * _theta - 0.001 * Math.abs(torque)
   // return -Math.abs(theta / Math.PI) - 0.01 * Math.abs(action)
 }
 

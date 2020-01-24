@@ -51,13 +51,18 @@ class ReplayBuffer {
   }
 
   sample_from_recent_memory_2() {
+    const time_bias = 0.9
     const mb_arr = []
     const idxs = []
     for (let i = 0; i < this.global.mb_len; i++) {
-      let attempts = 1000
-      let rand_idx = Math.floor(this.data.length * Math.sqrt(Math.random()))
+      let attempts = 100
+      let rand_idx = Math.floor(
+        this.data.length * Math.pow(Math.random(), time_bias)
+      )
       while (attempts > 0 && idxs.includes(rand_idx)) {
-        rand_idx = Math.floor(this.data.length * Math.sqrt(Math.random()))
+        rand_idx = Math.floor(
+          this.data.length * Math.pow(Math.random(), time_bias)
+        )
         attempts--
       }
       idxs.push(rand_idx)
